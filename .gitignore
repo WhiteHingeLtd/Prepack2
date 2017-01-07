@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+PrePack2/.vs/PrePack2/v15/.suo
+PrePack2/PrePack2/bin/*
+PrePack2/PrePack2/obj/*
+PrePack2/Packages/*
