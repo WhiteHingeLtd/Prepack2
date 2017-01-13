@@ -34,11 +34,11 @@
             <Label Content="Codes:&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55.993" FontWeight="Bold" Margin="0,5,0,-5"/>
             <TextBlock x:Name="Codes" HorizontalAlignment="Left" Margin="55.993,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="363.34" Height="23.96"/>
         </Grid>
-        <Grid x:Name="LabelShortTitleGrid" Margin="10,10,-49.334,67.748" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
+        <Grid x:Name="LabelShortTitleGrid" Margin="10,10,2,67.748" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="ItemLabel" VerticalAlignment="Top" Height="60.252" Width="1001.334" FontFamily="Segoe UI Semibold" FontSize="53.333" Margin="0,-2,0,0"/>
+            <TextBlock x:Name="LabelShortTitle" TextWrapping="Wrap" Text="ItemLabel" VerticalAlignment="Top" Height="60.252" FontFamily="Segoe UI Semibold" FontSize="53.333" Margin="0,-2,10,0"/>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="46" Margin="10,0,0,28" VerticalAlignment="Bottom" Width="181" Grid.Row="1" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin" Background="Lime">
             <Grid.ColumnDefinitions>
@@ -102,7 +102,7 @@
             </Grid>
             <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.508,70.135,0,324.905" BorderBrush="White" Background="#FF5B5B5B" Foreground="White"/>
         </Grid>
-        <TextBox x:Name="ScanFocusBox" Grid.Column="2" Height="23" Margin="66.001,0,0,0" TextWrapping="Wrap" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="ScanFocusBox" Grid.Column="1" Height="23" Margin="95.5,0,0,0" TextWrapping="Wrap" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
         <GroupBox Grid.Column="1" Header="Labels Printed" Height="215.117" Margin="7.332,44.883,12.666,0" Grid.Row="1" VerticalAlignment="Top">
             <TextBlock x:Name="LabelsNames" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Loading...." VerticalAlignment="Top" Height="221.96" Margin="0,0,-2,0" Width="156"/>
         </GroupBox>
@@ -124,8 +124,21 @@
             <Button x:Name="key0" Content="0" Margin="1" Foreground="Black" FontSize="53.333"/>
             <Button x:Name="keyPrint" Content="Print" Margin="1" Foreground="Black" FontSize="24"/>
         </UniformGrid>
-        <TextBox x:Name="Keypaddisp" Grid.Column="3" Height="34" Margin="107,291,-147,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin"/>
-        <Grid x:Name="PrepackAdminPanel" Grid.Column="3" Height="147" Margin="107,144,-147,0" Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin"/>
+        <TextBox x:Name="Keypaddisp" Grid.Column="3" Height="29" Margin="107,296,-147,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Grid x:Name="PrepackAdminPanel" Grid.Column="3" Height="152" Margin="107,144,-147,0" Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2">
+            <Grid HorizontalAlignment="Left" Height="152" VerticalAlignment="Top" Width="30">
+                <Image HorizontalAlignment="Left" Height="30" Margin="0,122,0,0" VerticalAlignment="Top" Width="30" Source="Clock_Icon.png"/>
+                <Image HorizontalAlignment="Left" Height="30" Margin="0,92,0,0" VerticalAlignment="Top" Width="30" Source="refresh.png"/>
+                <Image HorizontalAlignment="Left" Height="30" Margin="0,62,0,0" VerticalAlignment="Top" Width="30" Source="refresh.png"/>
+                <Image HorizontalAlignment="Left" Height="30" Margin="-1,28,0,0" VerticalAlignment="Top" Width="31" Source="DiskSav_Icon.png"/>
+                <Image HorizontalAlignment="Left" Height="28" Margin="2,0,0,0" VerticalAlignment="Top" Width="28" Source="Exclam_Icon.png"/>
+            </Grid>
+            <Button x:Name="AdminStatus" Content="Status" HorizontalAlignment="Left" Margin="35,125.04,0,0" VerticalAlignment="Top" Width="245" Background="{x:Null}" BorderBrush="{x:Null}"/>
+            <Button x:Name="KillDataRefresher" Content="Stop Updater" HorizontalAlignment="Left" Margin="35,95,0,0" VerticalAlignment="Top" Width="245" BorderBrush="{x:Null}" Background="{x:Null}"/>
+            <Button x:Name="RefreshCurrent" Content="Refresh this Item" HorizontalAlignment="Left" Margin="35,65.04,0,0" VerticalAlignment="Top" Width="245" BorderBrush="{x:Null}" Background="{x:Null}"/>
+            <Button x:Name="AdminUpdate" Content="Update Cache - Full Reset" HorizontalAlignment="Left" Margin="35,35,0,0" VerticalAlignment="Top" Width="245" BorderBrush="{x:Null}" Background="{x:Null}"/>
+            <Button x:Name="AdminTitle" Content="Prepack Admin" HorizontalAlignment="Left" Margin="35,5,0,0" VerticalAlignment="Top" Width="245" Background="{x:Null}" BorderBrush="{x:Null}"/>
+        </Grid>
         <Grid x:Name="PrePackHistoryGrid2" Grid.Column="3" Height="144" Margin="106.5,0,-147,0" Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
             <Grid.RowDefinitions>
                 <RowDefinition Height="35*"/>
@@ -143,31 +156,45 @@
         </Grid>
         <UniformGrid HorizontalAlignment="Left" Height="290.833" Margin="196,433.167,0,0" Grid.Row="1" VerticalAlignment="Top" Width="637.667" Rows="2" Columns="3">
             <Grid>
-                <Button x:Name="AutobagButton" Margin="20,40,26,34" FontFamily="Segoe UI Semilight" FontSize="24" Content="Autobag" RenderTransformOrigin="0.042,0.514" />
+                <Button x:Name="AutobagButton" Margin="10,10,10,10.001" FontFamily="Segoe UI Semilight" FontSize="24" Content="Autobag" RenderTransformOrigin="0.042,0.514" />
+                <Border x:Name="AutobagHighlight" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="125.416" VerticalAlignment="Top" Width="192.556" Margin="10,10,0,0"/>
             </Grid>
             <Grid>
-                <Button x:Name="PPReadyText" Margin="20,40,26,34" FontSize="21" FontFamily="Segoe UI Semilight" Content="Prepacked Ready"/>
+                <Button x:Name="PPReadyText" Margin="10,10,10,10.001" FontSize="21" FontFamily="Segoe UI Semilight" Content="Prepacked Ready"/>
+                <Border x:Name="PPReadyHighlight" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="125.417" Margin="10,10,0,0" VerticalAlignment="Top" Width="192.556"/>
             </Grid>
             <Grid>
                 <TextBlock x:Name="LocLbl" HorizontalAlignment="Right" Margin="0,26.833,37.766,46.584" TextWrapping="Wrap" Width="164.79"/>
             </Grid>
             <Grid>
                 <Button x:Name="PrePackLabel" Margin="10,0,3.708,0" VerticalAlignment="Top" Height="97" Padding="0" Foreground="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}">
-                    <Image Source="prepacklabel.png" Height="80.376" Width="157.419"/>
+                    <Image Source="prepacklabel.png" Height="94.938" Width="172.381" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="0.138"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
                 </Button>
                 <Button x:Name="PrepackLabelButton" Content="PrePack" Margin="10,102,10,0.001" BorderBrush="{x:Null}" Background="White" FontSize="22" FontFamily="Segoe UI Semilight"/>
+                <Border x:Name="PrePackHighlight" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="145.416" VerticalAlignment="Top" Width="210.556" Margin="2,0,0,0"/>
             </Grid>
             <Grid>
                 <Button x:Name="ShelfLabelBG" Margin="20.853,10,26.73,38.418" Foreground="{x:Null}" Background="{x:Null}" BorderBrush="Black"/>
                 <Button x:Name="ShelfLabelButton" Content="Shelf" Margin="10,106.999,0,-0.582" BorderBrush="{x:Null}" Background="White" FontFamily="Segoe UI Semilight" FontSize="22" HorizontalAlignment="Left" Width="192.556" Height="39" VerticalAlignment="Top"/>
+                <Border x:Name="ShelfLabelHighlight" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="145.417" VerticalAlignment="Top" Width="210.556" Margin="2,0,0,0"/>
             </Grid>
             <Grid Margin="0,0,0,0.001">
                 <Button x:Name="MagnetLabelBG" Content="" Margin="0,10,27.586,0" Background="White" BorderBrush="Black" HorizontalAlignment="Right" Width="164.47" Height="97" VerticalAlignment="Top"/>
                 <Button x:Name="MagnetLabelButton" Content="Magnet" Background="{x:Null}" FontFamily="Segoe UI Semilight" FontSize="22" Margin="10,107,10,0" BorderBrush="{x:Null}" />
+                <Border x:Name="MagnetLabelHighlight" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="145.416" VerticalAlignment="Top" Width="210.556" Margin="2,0,0,0"/>
             </Grid>
 
         </UniformGrid>
-        <Button x:Name="BundleDetailbutton" Content="Bundle" Grid.Column="1" HorizontalAlignment="Left" Margin="112.508,115,-0.001,0" VerticalAlignment="Top" Width="90" Background="Black" BorderBrush="{x:Null}" Foreground="White" Height="23" FontSize="14"/>
+        <Button x:Name="BundleDetailbutton" Content="Bundle" Grid.Column="1" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top" Width="90.5" Background="Black" BorderBrush="{x:Null}" Foreground="White" Height="23" FontSize="14"/>
     </Grid>
 
 </Window>

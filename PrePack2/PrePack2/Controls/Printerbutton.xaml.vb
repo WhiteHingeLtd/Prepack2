@@ -18,11 +18,11 @@
         End Set
     End Property
     Public Sub BigClick()
-        For Each buttonthing As Printerbutton In MainWindow.printerbuttons.Controls
+        For Each buttonthing As Printerbutton In MainWindow.PrinterButtons.Children
             buttonthing.Highlight(0)
         Next
         Me.Highlight(1)
-        MainWindow.PrinterName = printername.Text
+        MainWindow.PrinterName = PrinterLabel.Text
     End Sub
 
     Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles ImageButton1.Click

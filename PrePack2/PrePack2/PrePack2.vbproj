@@ -78,27 +78,13 @@
     <Compile Include="Controls\Printerbutton.xaml.vb">
       <DependentUpon>Printerbutton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\BagNoteEditor.designer.vb">
-      <DependentUpon>BagNoteEditor.vb</DependentUpon>
+    <Compile Include="Dialogs\BagNoteEditor.xaml.vb">
+      <DependentUpon>BagNoteEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\BagNoteEditor.vb" />
-    <Compile Include="Dialogs\BagNoteEditorWPF.xaml.vb">
-      <DependentUpon>BagNoteEditorWPF.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\BundleDialog.designer.vb">
-      <DependentUpon>BundleDialog.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\BundleDialog.vb" />
     <Compile Include="PrePackQueueItem.xaml.vb">
       <DependentUpon>PrePackQueueItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings.vb" />
-    <Compile Include="SkuCacheDownloadMask.Designer.vb">
-      <DependentUpon>SkuCacheDownloadMask.vb</DependentUpon>
-    </Compile>
-    <Compile Include="SkuCacheDownloadMask.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="UserControl1.xaml.vb">
       <DependentUpon>UserControl1.xaml</DependentUpon>
     </Compile>
@@ -106,7 +92,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Dialogs\BagNoteEditorWPF.xaml">
+    <Page Include="Dialogs\BagNoteEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -169,19 +155,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Dialogs\BagNoteEditor.resx">
-      <DependentUpon>BagNoteEditor.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\BundleDialog.resx">
-      <DependentUpon>BundleDialog.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SkuCacheDownloadMask.resx">
-      <DependentUpon>SkuCacheDownloadMask.vb</DependentUpon>
     </EmbeddedResource>
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -253,6 +230,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="prepacklabel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Exclam_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="DiskSav_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Clock_Icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

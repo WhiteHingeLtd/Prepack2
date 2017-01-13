@@ -1,0 +1,88 @@
+﻿<Window x:Class="BagNoteEditorWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrePack2"
+             mc:Ignorable="d" 
+             d:DesignHeight="720" d:DesignWidth="1280">
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid HorizontalAlignment="Left" Height="627" VerticalAlignment="Top" Width="180" Margin="10,0,0,0">
+            <GroupBox Header="Misc" HorizontalAlignment="Left" Height="607" Margin="10,10,0,0" VerticalAlignment="Top" Width="160" FontSize="15">
+                <UniformGrid HorizontalAlignment="Left" Height="566.5" Margin="10,10,-2,0" VerticalAlignment="Top" Width="140" Rows="8">
+                    <Button x:Name="SealLabel" Content="SEAL &amp; LABEL" Margin="10,10,10,5.001" FontSize="18"/>
+                    <Button x:Name="LabelOnly" Content="LABEL ONLY" Margin="10,-0.001,10,5" FontSize="18"/>
+                    <Button x:Name="PackDown" Content="PACK DOWN" Margin="10,0,10,5" FontSize="18"/>
+                    <Button x:Name="HandCount" Content="HAND COUNT" Margin="10,0,10,5" FontSize="18"/>
+                    <Button x:Name="OwnBox" Content="OWN BOX" Margin="10,0,10,5" FontSize="18"/>
+                    <Button x:Name="OwnBag" Content="OWN BAG" Margin="10,0,10,5" FontSize="18"/>
+                    <Grid/>
+                    <Button x:Name="NoPrepack" Content="NO PREPACK" Margin="10,5,10,10" FontWeight="Bold" FontSize="16"/>
+                </UniformGrid>
+            </GroupBox>
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="88" Margin="0,632,0,0" VerticalAlignment="Top" Width="1280">
+            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Current Pack Size:" VerticalAlignment="Top" Height="68" Width="680.29" FontSize="26"/>
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="632" Margin="195,0,0,0" VerticalAlignment="Top" Width="351">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <GroupBox Header="Bags" HorizontalAlignment="Left" Height="612" Margin="10,10,0,0" VerticalAlignment="Top" Width="331" FontSize="15">
+                <UniformGrid HorizontalAlignment="Left" Height="572" Margin="10,10,0,0" VerticalAlignment="Top" Width="302" Rows="8" Columns="2">
+                    <Button x:Name="BAGA" Content="BAG A" FontSize="20" Margin="10,10,5,5"/>
+                    <Button x:Name="LILA1" Content="LIL A1" FontSize="20" Margin="5,10,10,5"/>
+                    <Button x:Name="BAGB" Content="BAG B" FontSize="20" Margin="10,0,5,5"/>
+                    <Button x:Name="LILA194" Content="LIL A194" FontSize="20" Margin="5,0,10,5"/>
+                    <Button x:Name="BAGC" Content="BAG C" FontSize="20" Margin="10,0,5,5"/>
+                    <Button x:Name="LILA3" Content="LIL A3" FontSize="20" Margin="5,0,10,5"/>
+                    <Button x:Name="BAGD" Content="BAG D" FontSize="20" Margin="10,0,5,5"/>
+                    <Button x:Name="LILA5" Content="LIL A5" FontSize="20" Margin="5,0,10,5"/>
+                    <Button x:Name="BAGE" Content="BAG E" FontSize="20" Margin="10,0,5,5"/>
+                    <Grid/>
+                    <Button x:Name="BAGF" Content="BAG F" FontSize="20" Margin="10,0,5,5"/>
+                    <Button x:Name="AUTOSMALL" Content="AUTO SMALL" FontSize="20" Margin="5,0,10,5"/>
+                    <Button x:Name="BAGG" Content="BAG G" FontSize="20" Margin="10,0,5,5"/>
+                    <Button x:Name="AUTOLARGE" Content="AUTO LARGE" FontSize="20" Margin="5,0,10,5"/>
+                    <Button x:Name="BAGH" Content="BAG H" FontSize="20" Margin="10,0,5,10"/>
+                    <Button x:Name="LSEALER" Content="L SEALER" FontSize="20" Margin="5,0,10,10"/>
+                </UniformGrid>
+            </GroupBox>
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="627" Margin="546,0,0,0" VerticalAlignment="Top" Width="374">
+            <GroupBox Header="GroupBox" HorizontalAlignment="Left" Height="607" Margin="10,10,0,0" VerticalAlignment="Top" Width="354" FontSize="15">
+                <UniformGrid HorizontalAlignment="Left" Height="572" Margin="10,10,-2,0" VerticalAlignment="Top" Width="334" MinWidth="3" Rows="8" Columns="2">
+                    <Button x:Name="BOXAA" Content="BOX AA" Margin="10,10,5,5" FontSize="20"/>
+                    <Button x:Name="BOXH" Content="BOX H" Margin="0,10,10,5" FontSize="20"/>
+                    <Button x:Name="BOXA" Content="BOX A" Margin="10,5,5,5" FontSize="20"/>
+                    <Button x:Name="BOXHOBBIT" Content="BOX HOBBIT" Margin="0,5,10,5" FontSize="20"/>
+                    <Button x:Name="BOXB" Content="BOX B" Margin="10,5,5,5" FontSize="20"/>
+                    <Button x:Name="BOXCUTE" Content="BOX CUTE" Margin="0,5,10,5" FontSize="20"/>
+                    <Button x:Name="BOXC" Content="BOX C" Margin="10,5,5,5" FontSize="20"/>
+                    <Grid/>
+                    <Button x:Name="BOXD" Content="BOX D" Margin="10,5,5,5" FontSize="20"/>
+                    <Grid/>
+                    <Button x:Name="BOXE" Content="BOX E" Margin="10,5,5,0" FontSize="20" Height="66.5"/>
+                    <Grid/>
+                    <Button x:Name="BOXF" Content="BOX F" Margin="10,5,5,0" FontSize="20"/>
+                    <Grid/>
+                    <Button x:Name="BOXG" Content="BOX G" Margin="10,5,5,10" FontSize="20"/>
+                </UniformGrid>
+            </GroupBox>
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="627" Margin="925,0,0,0" VerticalAlignment="Top" Width="354">
+            <GroupBox Header="GroupBox" HorizontalAlignment="Left" Height="492" Margin="10,10,0,0" VerticalAlignment="Top" Width="334" FontSize="15">
+                <TextBox x:Name="NotesBox" HorizontalAlignment="Left" Height="452" Margin="10,10,-2,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="314"/>
+            </GroupBox>
+            <Grid HorizontalAlignment="Left" Height="120" Margin="0,507,0,0" VerticalAlignment="Top" Width="354">
+                <TextBlock HorizontalAlignment="Left" Margin="23,24.612,0,0" TextWrapping="Wrap" Text="New Bag:" VerticalAlignment="Top" Height="22.46" Width="81.79" FontSize="16"/>
+                <TextBlock x:Name="newbox" HorizontalAlignment="Left" Margin="118.5,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="38.531" Width="160.79" FontSize="22"><Run/><LineBreak/><Run/></TextBlock>
+                <Button x:Name="SaveClose" Content="SAVE &amp; CLOSE" HorizontalAlignment="Left" Margin="10,58.5,0,0" VerticalAlignment="Top" Width="334" Height="51.5" FontSize="24"/>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</Window>

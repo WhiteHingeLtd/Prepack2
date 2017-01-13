@@ -361,7 +361,7 @@ Class MainWindow
         Me.keypaddisp.Text = ""
     End Sub
 
-    Private Sub ScanFocusBox_KeyUp(ByVal sender As Object, ByVal e As KeyEventArgs) Handles ScanFocusBox.KeyUp
+    Public Sub ScanFocusBox_KeyDown(sender As Object, e As KeyEventArgs)
         If (e.KeyCode = Keys.Enter) And logins.Visible = False Then
             e.SuppressKeyPress = True
             My.Computer.Audio.Stop()
@@ -541,20 +541,20 @@ Class MainWindow
     '    End Try
     'End Sub
 
-    Private Sub UpdateSpecialValues()
-        Me.Codes.Text = (Me.PrimarysuppnameTextBox.Text.ToUpper & " - " & Me.PrimarysuppcodeTextBox.Text)
-        If (Me.AltsuppnameTextBox.TextLength > 0) Then
-            Dim textArray1 As String() = New String() {Me.Codes.Text, ", ", Me.AltsuppnameTextBox.Text.ToUpper, " - ", Me.AltsuppcodeTextBox.Text}
-            Me.Codes.Text = String.Concat(textArray1)
-        End If
-        If (Me.Supp3nameTextBox.TextLength > 0) Then
-            Dim textArray2 As String() = New String() {Me.Codes.Text, ", ", Me.Supp3nameTextBox.Text.ToUpper, " - ", Me.Supp3codeTextBox.Text}
-            Me.Codes.Text = String.Concat(textArray2)
-        End If
-    End Sub
+    'Private Sub UpdateSpecialValues()
+    '    Me.Codes.Text = (Me.PrimarysuppnameTextBox.Text.ToUpper & " - " & Me.PrimarysuppcodeTextBox.Text)
+    '    If (Me.AltsuppnameTextBox.TextLength > 0) Then
+    '        Dim textArray1 As String() = New String() {Me.Codes.Text, ", ", Me.AltsuppnameTextBox.Text.ToUpper, " - ", Me.AltsuppcodeTextBox.Text}
+    '        Me.Codes.Text = String.Concat(textArray1)
+    '    End If
+    '    If (Me.Supp3nameTextBox.TextLength > 0) Then
+    '        Dim textArray2 As String() = New String() {Me.Codes.Text, ", ", Me.Supp3nameTextBox.Text.ToUpper, " - ", Me.Supp3codeTextBox.Text}
+    '        Me.Codes.Text = String.Concat(textArray2)
+    '    End If
+    'End Sub
 
     Private Sub WhlnewBindingSource_ListChanged(ByVal sender As Object, ByVal e As ListChangedEventArgs)
-        Me.UpdateSpecialValues()
+        'Me.UpdateSpecialValues()
     End Sub
 
     Private Sub ChooseLabel(ByVal labelid As Integer)
@@ -607,7 +607,7 @@ Class MainWindow
             Me.PritingLabelID = 4
             Me.pritinglabel = "Autobag"
             Me.HasAutobagHistory = True
-            Me.AutobagModeHider.Visibility = True
+            'Me.AutobagModeHider.Visibility = True
             Me.PrepackHighlight.Visibility = False
             Me.ShelfLabelHighlight.Visibility = False
             Me.MagnetLabelHighlight.Visibility = False
@@ -651,7 +651,7 @@ Class MainWindow
                 ProjectData.ClearProjectError()
             End Try
         End If
-        Me.UpdateScores()
+        ' Me.UpdateScores()
     End Sub
 
 
@@ -715,7 +715,6 @@ Class MainWindow
         Else
             EMsgbox("Something weird happened. Try again.", Nothing, Nothing)
         End If
-        Application.DoEvents()
         ScanFocusBox.Text = ""
         ScanFocusBox.Focus()
 
@@ -756,8 +755,8 @@ Class MainWindow
 
                     '06/05/2016     Checks to see if the prepackbag is none or a blank string
                     If Child.PrepackInfo.Bag = Nothing Or Child.PrepackInfo.Bag = "NEVER BAGGED" Or Child.PrepackInfo.Bag.Length < 2 Then
-                        BagNoteEditor.ActiveSku = Child
-                        BagNoteEditor.ShowDialog()
+                        BagNoteEditorWPF.ActiveSku = Child
+                        BagNoteEditorWPF.ShowDialog()
                     End If
                 End If
             Catch ex As Exception
@@ -818,8 +817,8 @@ Class MainWindow
 
     Private Sub ImageButton1_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles ChangeButton.Click
         If Not IsNothing(SelectedSKU) Then
-            BagNoteEditor.ActiveSku = SelectedSKU
-            BagNoteEditor.ShowDialog()
+            BagNoteEditorWPF.ActiveSku = SelectedSKU
+            BagNoteEditorWPF.ShowDialog()
 
             ScanFocusBox.Focus()
         End If
@@ -840,7 +839,6 @@ Class MainWindow
         SkuCacheINitLoader.Stop()
         SkusFullLoaded = False
 
-        Application.DoEvents()
 
         Dim Loader2 As New GenericDataController
         Try
@@ -894,9 +892,9 @@ Class MainWindow
     Private Sub AdminStatusUpdater_Tick(sender As Object, e As EventArgs)
         Try
             If Skusfull.RefreshStatus.Length < 2 Then
-                AdminStatus.Text = "RStatus- " + Skusfull.CountDone
+                AdminStatus.Content = "RStatus- " + Skusfull.CountDone
             Else
-                AdminStatus.Text = "Status - " + Skusfull.RefreshStatus
+                AdminStatus.Content = "Status - " + Skusfull.RefreshStatus
             End If
 
         Catch ex As Exception
@@ -909,10 +907,7 @@ Class MainWindow
         Skusfull.CAncelThreadedWorker()
         SkusFullLoaded = False
         logins.HidePanel()
-        While Skusfull.WorkerBusy
-            'Don't hang, do events then continue hanging...
-            Application.DoEvents()
-        End While
+
         Skusfull.DisposeThreadedWorker()
         Dim Loader As New WHLClasses.SkusDataController
         Loader.SaveData(Skusfull)
@@ -1030,7 +1025,7 @@ Class MainWindow
                     Dim NewQueueItem As New PrePackQueueItem
                     NewQueueItem.SkuNum = order.Issue.DodgySku '10/09/16
                     NewQueueItem.OrderNum = order.Order.OrderId '10/09/16
-                    NewQueueItem.ItemBG.Background = Brushes.OliveDrab
+                    NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.OliveDrab
                     NewQueueItem.Shelf.Text = sku.GetLocation(SKULocation.SKULocationType.Pickable).LocationText
                     NewQueueItem.Sku.Text = sku.Title.Label
                     NewQueueItem.Info.Text = order.Order.BetterItems(order.Issue.IssueItemIndex).OrderQuantity.ToString + "x " + sku.PackSize.ToString + "-pack"
@@ -1041,7 +1036,7 @@ Class MainWindow
                     If order.Order.PicklistType = ItemPicklistType.MultiMixedFirst Or order.Order.PicklistType = ItemPicklistType.MultiMixedSecond Or order.Order.PicklistType = ItemPicklistType.Courier Then
                         'Mixed multi - Priority or something
                         If Not tooMuchGood Then
-                            NewQueueItem.ItemBG.Background = Brushes.Red
+                            NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.Red
                             Goods.Add(NewQueueItem)
                         End If
 
@@ -1049,7 +1044,7 @@ Class MainWindow
                         'Not mixed multi, lower priority.
                         If Not tooMuchShit And Not tooMuchGood Then
 
-                            NewQueueItem.ItemBG.Background = Brushes.Black
+                            NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.Black
                             Shits.Add(NewQueueItem)
                         End If
                     End If
@@ -1093,7 +1088,7 @@ Class MainWindow
     Dim workerEx As New Exception
 
     '10/03/2016     Updates the PPQ, and tells it to populate. Will be force run when a PPQ item is "Completed"
-    Private Sub UpdatePrepackOrders_Tick(sender As Object, e As EventArgs) Handles UpdatePrepackOrders.Tick
+    Private Sub UpdatePrepackOrders_Tick(sender As Object, e As EventArgs)
 
         'If Now > skuRefreshTime Then
 
@@ -1118,7 +1113,7 @@ Class MainWindow
         'End If
     End Sub
 
-    Private Sub PPQWorkerWork() Handles PrepackQueueWorker.DoWork
+    Private Sub PPQWorkerWork()
         Try
             workerWorked = True
             PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
@@ -1144,15 +1139,17 @@ Class MainWindow
         Dim ErrorLabel As New TextBlock
         PPQPanel.Children.Clear()
         ErrorLabel.Text = workerEx.ToString
-        ErrorLabel.Background = New SolidColorBrush(Color.FromArgb(50, 0, 0, 0))
-        ErrorLabel.Foreground = Brushes.White
-        ErrorLabel.FontStyle = New FontStyle("Consolas", 11.0!)
+        ErrorLabel.Background = New SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 0, 0, 0))
+        ErrorLabel.Foreground = System.Windows.Media.Brushes.White
+        ErrorLabel.FontSize = 11.0
+
+
         ErrorLabel.Width = 443
         ErrorLabel.Height = 188
         PPQPanel.Children.Add(ErrorLabel)
     End Sub
 
-    Private Sub PPQWorkerReport() Handles PrepackQueueWorker.ProgressChanged
+    Private Sub PPQWorkerReport()
         If workerWorked Then
             For Each goodOrder As PrePackQueueItem In Goods
                 If PPQPanel.Children.Count >= 20 Then
@@ -1176,9 +1173,9 @@ Class MainWindow
         For Each order As IssueDataAndOrder In PrePackQueue
             If order.Issue.Prepack_WorkingOnIt Then
                 'find the control
-                For Each PPQItem As PrePackQueueItem In PPQPanel.Controls
+                For Each PPQItem As PrePackQueueItem In PPQPanel.Children
                     If PPQItem.OrderNum = order.Order.OrderId Then
-                        PPQItem.UglyOrangePanel.Visible = True
+                        'PPQItem.UglyOrangePanel.Visible = True
                     End If
                 Next
             End If
@@ -1253,6 +1250,7 @@ Class MainWindow
     Friend AdminStatusUpdater As New System.Windows.Threading.DispatcherTimer
     Friend UpdatePrepackOrders As New System.Windows.Threading.DispatcherTimer
     Friend Sub LoadTimers()
+        AddHandler ScanFocusBox.KeyDown, AddressOf ScanFocusBox_KeyDown
         AddHandler DataRefresher.Tick, AddressOf DataRefresher_Tick
         AddHandler SkuCacheINitLoader.Tick, AddressOf SkuCacheInitLoader_Tick
         AddHandler Clock.Tick, AddressOf Clock_Tick
