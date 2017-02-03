@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:PrePack2"
         mc:Ignorable="d"
         Closing="Main_FormClosing"
-        Title="MainWindow" Height="900" Width="1900">
+        Title="MainWindow" Height="900" Width="1900" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+    <Viewbox>
     <Grid Height="890" VerticalAlignment="Top" Margin="0,0,150,-21">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="480*"/>
@@ -109,7 +110,9 @@
         <GroupBox Header="Skus Packed" Margin="0.668,44.883,19.338,0" Height="215.117" VerticalAlignment="Top" Grid.Column="2" Grid.Row="1">
             <TextBlock x:Name="SkusNames" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Loading...." VerticalAlignment="Top" Height="205.117" Margin="0,0,0,-12.96" Width="156"/>
         </GroupBox>
-        <Grid x:Name="PrinterButtons" Grid.Column="3" Margin="5.8,45.883,184.785,27" Grid.Row="1" Width="101.2"/>
+        <Grid x:Name="PrinterButtons" Grid.Column="3" Margin="5.8,45.883,184.785,27" Grid.Row="1" Width="101.2">
+            <StackPanel x:Name="PrinterbuttonPanel"/>
+        </Grid>
         <UniformGrid Grid.Column="3" Margin="107,325,-147,27" Grid.Row="1" Rows="4" Columns="3" Grid.ColumnSpan="2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
             <Button x:Name="Key1" Content="1" Margin="1" Foreground="Black" FontSize="53.333"/>
             <Button x:Name="Key2" Content="2" Margin="1" Foreground="Black" FontSize="53.333"/>
@@ -196,5 +199,5 @@
         </UniformGrid>
         <Button x:Name="BundleDetailbutton" Content="Bundle" Grid.Column="1" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top" Width="90.5" Background="Black" BorderBrush="{x:Null}" Foreground="White" Height="23" FontSize="14"/>
     </Grid>
-
+    </Viewbox>
 </Window>

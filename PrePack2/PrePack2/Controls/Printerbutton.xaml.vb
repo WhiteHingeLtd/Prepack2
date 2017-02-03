@@ -18,9 +18,7 @@
         End Set
     End Property
     Public Sub BigClick()
-        For Each buttonthing As Printerbutton In MainWindow.PrinterButtons.Children
-            buttonthing.Highlight(0)
-        Next
+
         Me.Highlight(1)
         MainWindow.PrinterName = PrinterLabel.Text
     End Sub

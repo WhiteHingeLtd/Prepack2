@@ -20,11 +20,14 @@ Public Class PrePackQueueItem
                     If foundIssue.DodgySku = SkuNum Then 'If they're dealing with one issue in the order with this sku number, they're effectively dealing with them all
                         If Not foundIssue.Prepack_WorkingOnIt Then
                             foundIssue.Prepack_WorkingOnIt = True
-                            UglyOrangePanel.Visible = True 'This needs to turn on IMMEDIATELY
+
                             edited = True
                         Else
-                            MainWindow.EMsgbox("Someone is currently working on this one. It may take a moment to update the status.")
-                            UglyOrangePanel.Visible = True 'This wasn't fast enough
+                            Dim MsgBox2 As New WPFMsgBoxDialog
+                            MsgBox2.Title.Text = ""
+                            MsgBox2.Body.Text = "Someone is currently working on this one. It may take a moment to Update the Status."
+
+
                             Exit For
                         End If
                     End If

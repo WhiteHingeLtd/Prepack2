@@ -1,4 +1,4 @@
-﻿Public Class BagNoteEditorWPF
+﻿Public Class BagNoteEditor
     Dim boxtext As String
     Public ActiveSku As WHLClasses.WhlSKU
     Private Sub GetButtonContent(sender As Object, E As EventArgs)

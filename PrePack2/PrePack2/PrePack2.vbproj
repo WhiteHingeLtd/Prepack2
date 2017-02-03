@@ -81,6 +81,9 @@
     <Compile Include="Dialogs\BagNoteEditor.xaml.vb">
       <DependentUpon>BagNoteEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\WPFMsgBoxDialog.xaml.vb">
+      <DependentUpon>WPFMsgBoxDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PrePackQueueItem.xaml.vb">
       <DependentUpon>PrePackQueueItem.xaml</DependentUpon>
     </Compile>
@@ -93,6 +96,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\BagNoteEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\WPFMsgBoxDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

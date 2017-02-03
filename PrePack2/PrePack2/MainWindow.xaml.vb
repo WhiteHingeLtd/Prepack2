@@ -17,7 +17,6 @@ Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Speech.Synthesis
 Imports System.Windows.Threading
-Imports System.Windows.Forms
 Imports System.IO
 Imports WHLClasses
 Imports WHLClasses.Orders
@@ -25,13 +24,12 @@ Imports LinnworksAPI
 
 Class MainWindow
     Public bundlepacks As String = ""
-    Private CheckUpdate As Object = True
     Private HasAutobagHistory As Boolean = False
     Public logins As FullscreenLogin = New FullscreenLogin
     Private NewScan As Boolean = False
     Public NoBox As Boolean = False
     Public PrepackInfo As ArrayList = New ArrayList
-    Public PrinterName As String = ""
+    Public Shared PrinterName As String = ""
     Private pritinglabel As String
     Private PritingLabelID As Integer = 1
     Public SelectedSKU As WhlSKU
@@ -69,7 +67,10 @@ Class MainWindow
         ' COMPLETELY REDO PRINTING CODE TO USE LABELGENERATOR
         If Me.PritingLabelID = 1 Then               'Prepack
             If IsNothing(SelectedSKU) Then
-                EMsgbox("You need to choose a packsize.", Nothing, Nothing)
+                Dim EMsgBox As New WPFMsgBoxDialog
+
+                EMsgBox.Body.Text = "You need to choose a packsize."
+                EMsgBox.ShowDialog()
             Else
                 'It's all good. 
                 If printquantity > 50 Then
@@ -97,7 +98,10 @@ Class MainWindow
 
 
                 Catch ex As ArgumentException
-                    EMsgbox("You can't print a label for this pack. It doesn't seem to have a GS1. Speak to whoever is responsible to fix this. ", Nothing, Nothing)
+                    Dim EMsgBox As New WPFMsgBoxDialog
+
+                    EMsgBox.Body.Text = "This item doesn't appear to have a GS1. Please speak to IT"
+                    EMsgBox.ShowDialog()
                 End Try
 
             End If
@@ -173,9 +177,15 @@ Class MainWindow
             End If
         ElseIf Me.PritingLabelID = 4 Then           'Autobag
             If IsNothing(SelectedSKU) Then
-                EMsgbox("You need to choose a packsize.", Nothing, Nothing)
+                Dim EMsgBox As New WPFMsgBoxDialog
+
+                EMsgBox.Body.Text = "You need to choose a packsize."
+                EMsgBox.ShowDialog()
             Else
-                EMsgbox("Make sure you clear the previous job first!", MsgBoxStyle.ApplicationModal, "Autobag")
+                Dim EMsgBox As New WPFMsgBoxDialog
+                EMsgBox.Title.Text = "Autobag"
+                EMsgBox.Body.Text = "Make sure you clear the previous job first."
+                EMsgBox.ShowDialog()
                 'It's all good. 
                 If printquantity > 50 Then
                     printquantity = 50
@@ -200,7 +210,10 @@ Class MainWindow
                         MsgBox("Something went wrong." + vbNewLine + exString)
                     End If
                 Catch ex As ArgumentException
-                    EMsgbox("You can't print a label for this pack. It doesn't seem to have a GS1. Speak to whoever is responsible to fix this. ", Nothing, Nothing)
+                    Dim EMsgBox1 As New WPFMsgBoxDialog
+
+                    EMsgBox1.Body.Text = "This Item doesn't appear to have a GS1. Please speak to IT"
+                    EMsgBox1.ShowDialog()
                 End Try
             End If
         End If
@@ -260,7 +273,10 @@ Class MainWindow
         BarcodeSettings.ApplyKey("LJG05B1M4RS-FOTV9-JSHEF-CQOHO")
         Dim response As Object = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
         If response.GetType Is "".GetType Then
-            EMsgbox("Couldn't load prepack info. ", Nothing, Nothing)
+            Dim EMsgBox As New WPFMsgBoxDialog
+            EMsgBox.Body.Text = "Couldn't load Prepack Info"
+            EMsgBox.ShowDialog()
+
         Else
             Me.PrepackInfo = response
         End If
@@ -273,7 +289,7 @@ Class MainWindow
 
     End Sub
 
-    Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Activated
+    Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
         ScanFocusBox.Focus()
         Me.logins.Standalone = False
         Me.logins.InitAuth()
@@ -290,9 +306,14 @@ Class MainWindow
                 PrinterName = str
             Loop
         Finally
-            If TypeOf enumerator Is IDisposable Then
-                TryCast(enumerator, IDisposable).Dispose()
-            End If
+            Try
+
+                If TypeOf enumerator Is IDisposable Then
+                    TryCast(enumerator, IDisposable).Dispose()
+                End If
+            Catch ex As NullReferenceException
+            End Try
+
         End Try
 
         Try
@@ -303,7 +324,6 @@ Class MainWindow
             Me.logins.AppVerStr = "DEBUG"
             ProjectData.ClearProjectError()
         End Try
-        MyBase.WindowState = FormWindowState.Maximized
         Me.ChooseLabel(1)
     End Sub
 
@@ -361,9 +381,9 @@ Class MainWindow
         Me.keypaddisp.Text = ""
     End Sub
 
-    Public Sub ScanFocusBox_KeyDown(sender As Object, e As KeyEventArgs)
-        If (e.KeyCode = Keys.Enter) And logins.Visible = False Then
-            e.SuppressKeyPress = True
+    Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles ScanFocusBox.KeyDown
+        If (e.Key = Key.Return) And logins.Visible = False Then
+            e.Handled = True
             My.Computer.Audio.Stop()
             Me.ExecuteSearch()
         End If
@@ -374,20 +394,12 @@ Class MainWindow
     End Sub
 
     Private Sub ShortSku_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ShortSku.Click
-        If (MyBase.WindowState = FormWindowState.Normal) Then
-            MyBase.WindowState = FormWindowState.Maximized
+        If (Me.WindowState = WindowState.Normal) Then
+            Me.WindowState = WindowState.Maximized
         Else
-            MyBase.WindowState = FormWindowState.Normal
+            Me.WindowState = WindowState.Normal
         End If
     End Sub
-
-    'Private Sub ShortSku_TextChanged(ByVal sender As Object, ByVal e As EventArgs) Handles ShortSku.
-    '    Me.Packsizes.Items.Clear()
-    '    Me.SalesInfo.Items.Clear()
-
-    '    ScanFocusBox.Focus()
-
-    'End Sub
 
     Private Sub UpdateLoginInfo()
         Try
@@ -621,37 +633,11 @@ Class MainWindow
 
     Private Sub DataRefresher_Tick(ByVal sender As Object, ByVal e As EventArgs)
         Try
-            Me.PrepackInfo = DirectCast(WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist"), ArrayList)
+            PrepackInfo = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
         Catch exception1 As Exception
-            ProjectData.SetProjectError(exception1)
-            Dim exception As Exception = exception1
-            ProjectData.ClearProjectError()
-        End Try
-        If Conversions.ToBoolean(Me.CheckUpdate) Then
-            Me.CheckUpdate = False
-            Try
-                Dim info As UpdateCheckInfo = ApplicationDeployment.CurrentDeployment.CheckForDetailedUpdate
-                If (info.UpdateAvailable And (info.AvailableVersion > ApplicationDeployment.CurrentDeployment.CurrentVersion)) Then
-                    Dim textArray1 As String() = New String() {"There is an update available: " & ChrW(13) & ChrW(10) & ChrW(13) & ChrW(10), info.AvailableVersion.ToString, " (", Math.Round(CDbl((CDbl(info.UpdateSizeBytes) / 1024))).ToString, "kB) " & ChrW(13) & ChrW(10) & ChrW(13) & ChrW(10) & "Do you want to install it?"}
-                    If (Conversions.ToInteger(Me.EMsgbox(String.Concat(textArray1), MsgBoxStyle.YesNo, "Update Available")) = 6) Then
-                        If ApplicationDeployment.CurrentDeployment.Update Then
-                            Me.EMsgbox("The update was installed. The application will now restart to apply the update.", MsgBoxStyle.ApplicationModal, "Alert")
 
-                            ProjectData.EndApp()
-                        Else
-                            Me.EMsgbox("The update failed to install.", MsgBoxStyle.ApplicationModal, "Alert")
-                            Me.CheckUpdate = True
-                        End If
-                    End If
-                End If
-            Catch exception3 As Exception
-                ProjectData.SetProjectError(exception3)
-                Dim exception2 As Exception = exception3
-                Me.CheckUpdate = True
-                ProjectData.ClearProjectError()
-            End Try
-        End If
-        ' Me.UpdateScores()
+        End Try
+
     End Sub
 
 
@@ -659,20 +645,18 @@ Class MainWindow
     Friend ActiveChildren As SkuCollection
 
     Private Sub ExecuteSearch()
-
         Dim text As String = ScanFocusBox.Text
-        If [text].StartsWith("qzu") Then
-            Me.logins.replaceUser([text])
-        ElseIf ([text].Length > 0) Then
-
-            If ([text].StartsWith("10") And ([text].Length = 11)) Then
-                [text] = [text].Remove(7)
+        If text.StartsWith("qzu") Then
+            logins.replaceUser(text)
+        ElseIf (text.Length > 0) Then
+            If text.StartsWith("10") And text.Length = 11 Then
+                text = text.Remove(7)
             End If
-            Me.NewScan = True
+            NewScan = True
             '28/01/2016     Swapped out the old raw code for the class host searching methods. 
-            Try
 
-                Dim SearchResults As SkuCollection = Skusfull.ExcludeStatus("Dead").SearchSKUS([text])
+            Try
+                Dim SearchResults As SkuCollection = Skusfull.ExcludeStatus("Dead").SearchSKUS(text)
                 If SearchResults.Count > 1 Then
 
                     Dim AllSame As Boolean = True
@@ -688,32 +672,72 @@ Class MainWindow
                         'Continue!
                         ActiveItem = SearchResults(0)
                         PopulateData()
+                        Try
+                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                                Try
+                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                Catch ex As Exception
+                                End Try
+
+                            Next
+                        Catch ex As Exception
+                            MsgBox(ex.Message.ToString)
+                        End Try
                     Else
                         'Got a choice here kid. 
-                        Me.Synthesizer.SpeakAsync("Choose the correct item from the list.")
-                        BundleDialog.bundleoptionsal = SearchResults
-                        BundleDialog.ShowDialog()
-                        ActiveItem = BundleDialog.chosenshsku
+                        Synthesizer.SpeakAsync("Choose the correct item from the list.")
+                        'BundleDialog.bundleoptionsal = SearchResults
+                        'BundleDialog.ShowDialog()
+                        'ActiveItem = BundleDialog.chosenshsku
                         PopulateData()
+                        Try
+                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                                Try
+                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                Catch ex As Exception
+                                End Try
+
+                            Next
+                        Catch ex As Exception
+                            MsgBox(ex.Message.ToString)
+                        End Try
                     End If
 
                 ElseIf SearchResults.Count = 0 Then
                     'No results. RIP. 
-                    Me.Synthesizer.SpeakAsync("Nothing found.")
-                    Me.ResetDisp()
+                    Synthesizer.SpeakAsync("Nothing found.")
+                    ResetDisp()
                 Else
                     'Continue!
                     ActiveItem = SearchResults(0)
                     PopulateData()
+                    Try
+                        For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                            Try
+                                ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                            Catch ex As Exception
+                            End Try
+
+                        Next
+                    Catch ex As Exception
+                        MsgBox(ex.Message.ToString)
+                    End Try
 
                 End If
             Catch ex As Exception
-                EMsgbox("Couldn't search because the system is too busy, please try again in a few minutes.", Nothing, Nothing)
+                Dim EMsgBox As New WPFMsgBoxDialog
+
+                EMsgBox.Body.Text = "Couldn't search because the system is too busy, please try again in a few minutes."
+                EMsgBox.ShowDialog()
+
             End Try
 
 
         Else
-            EMsgbox("Something weird happened. Try again.", Nothing, Nothing)
+            Dim EMsgBox As New WPFMsgBoxDialog
+
+            EMsgBox.Body.Text = "We couldn't recognise that barcode, Please try again."
+            EMsgBox.ShowDialog()
         End If
         ScanFocusBox.Text = ""
         ScanFocusBox.Focus()
@@ -755,13 +779,19 @@ Class MainWindow
 
                     '06/05/2016     Checks to see if the prepackbag is none or a blank string
                     If Child.PrepackInfo.Bag = Nothing Or Child.PrepackInfo.Bag = "NEVER BAGGED" Or Child.PrepackInfo.Bag.Length < 2 Then
-                        BagNoteEditorWPF.ActiveSku = Child
-                        BagNoteEditorWPF.ShowDialog()
+                        Dim BagNoteEditorNew As New BagNoteEditor
+                        BagNoteEditorNew.ActiveSku = Child
+                        BagNoteEditorNew.ShowDialog()
+
+
                     End If
                 End If
             Catch ex As Exception
                 Reporting.ReportException(ex, False)
-                EMsgbox("The system was unable to display data for the pack of " + Child.PackSize.ToString, Nothing, Nothing)
+                Dim EMsgBox As New WPFMsgBoxDialog
+                EMsgBox.Body.Text = "The system was unable to display data for the pack of " + Child.PackSize.ToString
+                EMsgBox.ShowDialog()
+
             End Try
         Next
         'If ActiveChildren.Count = 1 Then       '19/04/16 - Change made after "Value of 0" error.
@@ -780,13 +810,16 @@ Class MainWindow
             For Each item As WhlSKU In ActiveItem.Composition
                 itemCompString += item.GetLocation(SKULocation.SKULocationType.Pickable).LocationText + " - " + item.Title.Label + "." + vbNewLine
             Next
+            Dim EMsgBox As New WPFMsgBoxDialog
+            EMsgBox.Body.Text = itemCompString
+            EMsgBox.Title.Text = "Items in Bundle:"
+            EMsgBox.ShowDialog()
 
-            EMsgbox(itemCompString, MsgBoxStyle.OkOnly, "Items in bundle:")
         End If
     End Sub
 
     Private Sub GetHistory()
-        HistoryLabel.Text = ("SKU Prepack History (" & SelectedSKU.SKU & ")")
+        Historylabel.Text = ("SKU Prepack History (" & SelectedSKU.SKU & ")")
         Dim list As New ArrayList
         list = WHLClasses.MySQL.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
         If (list.Count = 0) Then
@@ -816,21 +849,21 @@ Class MainWindow
     End Sub
 
     Private Sub ImageButton1_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles ChangeButton.Click
+        Dim Dialog As New BagNoteEditor
+
         If Not IsNothing(SelectedSKU) Then
-            BagNoteEditorWPF.ActiveSku = SelectedSKU
-            BagNoteEditorWPF.ShowDialog()
+            Dialog.ActiveSku = SelectedSKU
+            Dialog.ShowDialog()
+
 
             ScanFocusBox.Focus()
         End If
 
     End Sub
 
-    Private Sub ImageButton3_Click(ByVal sender As Object, ByVal e As EventArgs)
-        EMsgbox("This feature has disappeared. Tell me if you actually miss it. ", Nothing, Nothing)
-    End Sub
 
     Private Sub KeypadPress(sender As Button, e As EventArgs) Handles KeyClear.Click, Key8.Click, Key7.Click, Key6.Click, Key5.Click, Key4.Click, Key3.Click, Key2.Click, Key1.Click, key0.Click, AutobagBG.Click
-        Keypad(sender.Text)
+        Keypad(sender.Content.ToString)
         ScanFocusBox.Focus()
     End Sub
 
@@ -843,41 +876,13 @@ Class MainWindow
         Dim Loader2 As New GenericDataController
         Try
 
-            If Not ForceUpdate Then
-                Try
-                    'If it's less than 12 hours old. 
-                    Skusfull = Loader2.LoadSkuColl(My.Computer.FileSystem.SpecialDirectories.CurrentUserApplicationData + "\SkusCache.bin", True, False)
-                    'Skusfull = Skusfull.ExcludeStatus("Dead")
-                    Skus = Skusfull.MakeMixdown
-                    Skusfull.SetUpWorker()
-                    Skusfull.StartThreadedWorker()
-                    SkusFullLoaded = True
-                Catch ex2 As Exception
+            Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
+            Skus = Skusfull.MakeMixdown
 
-                    Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
-                    'Skusfull = Skusfull.ExcludeStatus("Dead")
-                    Skus = Skusfull.MakeMixdown
-                    Loader2.SaveDataToFile("Skuscache.bin", Skusfull, My.Computer.FileSystem.SpecialDirectories.CurrentUserApplicationData)
-                    Skusfull.SetUpWorker()
-                    Skusfull.StartThreadedWorker()
-                    SkusFullLoaded = True
-                End Try
-            Else
-                Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
-                'Skusfull = Skusfull.ExcludeStatus("Dead")
-                Skus = Skusfull.MakeMixdown
-                Loader2.SaveDataToFile("Skuscache.bin", Skusfull, My.Computer.FileSystem.SpecialDirectories.CurrentUserApplicationData)
-                Skusfull.SetUpWorker()
-                Skusfull.StartThreadedWorker()
-                SkusFullLoaded = True
-            End If
         Catch ex As Exception
-            EMsgbox(ex.ToString, Nothing, Nothing)
+            MsgBox(ex.Message.ToString)
         End Try
-        SkuCacheDownloadMask.Close()
-        ForceUpdate = False
 
-        'skuRefreshTime = Now.AddHours(1)
     End Sub
 
     Dim ForceUpdate As Boolean = False
@@ -914,7 +919,7 @@ Class MainWindow
     End Sub
 
     Private Sub KeypadPress(sender As Object, e As EventArgs) Handles keyClear.Click, key8.Click, key7.Click, key6.Click, key5.Click, key4.Click, key3.Click, key2.Click, key1.Click, key0.Click, AutobagBG.Click
-        Keypad(sender.ButtonText)
+        Keypad(sender.Content)
         ScanFocusBox.Focus()
     End Sub
 
@@ -994,94 +999,6 @@ Class MainWindow
 
     Dim loader As New GenericDataController
 
-    Dim Shits As New List(Of PrePackQueueItem)
-    Dim Goods As New List(Of PrePackQueueItem)
-
-    '10/03/2016     Populates the prepack queue list.
-    Private Sub PopulatePPQ()
-        If SkusFullLoaded Then
-
-            Shits.Clear()
-            Goods.Clear()
-            Dim tooMuchGood As Boolean = False
-            Dim tooMuchShit As Boolean = False
-
-            For Each order As IssueDataAndOrder In PrePackQueue
-                'Limit to 20
-                If Goods.Count >= 20 Then
-                    'Priority - Stop gathering completely.
-                    tooMuchGood = True
-                ElseIf Shits.Count >= 20 Then
-                    'Lower priority - Stop gathering shits.
-                    tooMuchShit = True
-                    'ElseIf (Goods.Count + Shits.Count) > 20 Then 'Superfluous. We won't collect more than 40 now.
-                End If
-
-
-                Try
-                    Dim newSkuColl As New SkuCollection(True)
-                    newSkuColl.AddRange(Skusfull)
-                    Dim sku As WhlSKU = newSkuColl.SearchBarcodes(order.Issue.DodgySku)(0)
-                    Dim NewQueueItem As New PrePackQueueItem
-                    NewQueueItem.SkuNum = order.Issue.DodgySku '10/09/16
-                    NewQueueItem.OrderNum = order.Order.OrderId '10/09/16
-                    NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.OliveDrab
-                    NewQueueItem.Shelf.Text = sku.GetLocation(SKULocation.SKULocationType.Pickable).LocationText
-                    NewQueueItem.Sku.Text = sku.Title.Label
-                    NewQueueItem.Info.Text = order.Order.BetterItems(order.Issue.IssueItemIndex).OrderQuantity.ToString + "x " + sku.PackSize.ToString + "-pack"
-
-                    AddHandler NewQueueItem.MouseUp, AddressOf ClickPPQI
-                    AddHandler NewQueueItem.TouchUp, AddressOf ClickPPQI
-
-                    If order.Order.PicklistType = ItemPicklistType.MultiMixedFirst Or order.Order.PicklistType = ItemPicklistType.MultiMixedSecond Or order.Order.PicklistType = ItemPicklistType.Courier Then
-                        'Mixed multi - Priority or something
-                        If Not tooMuchGood Then
-                            NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.Red
-                            Goods.Add(NewQueueItem)
-                        End If
-
-                    Else
-                        'Not mixed multi, lower priority.
-                        If Not tooMuchShit And Not tooMuchGood Then
-
-                            NewQueueItem.ItemBG.Background = System.Windows.Media.Brushes.Black
-                            Shits.Add(NewQueueItem)
-                        End If
-                    End If
-                    'PPQPanel.Controls.Add(NewQueueItem)
-                Catch ex As Exception
-
-                End Try
-            Next
-
-        End If
-    End Sub
-
-    'If I click a PPQI
-    Private Sub ClickPPQI(sender As Object, e As EventArgs)
-        Dim theOrder As Linnworks.Orders.ExtendedOrder = loader.LoadOrdex("T:\AppData\Orders\" + sender.OrderNum + ".ordex")
-
-        If theOrder.Status = OrderStatus._Withdrawn Then
-            MsgBox("This order has been withdrawn. It may take a moment to update the status.")
-        Else
-            Dim edited As Boolean = False
-            For Each foundIssue As IssueData In theOrder.issues
-                If foundIssue.DodgySku = sender.SkuNum Then 'If they're dealing with one issue in the order with this sku number, they're effectively dealing with them all
-                    If Not foundIssue.Prepack_WorkingOnIt Then
-                        foundIssue.Prepack_WorkingOnIt = True
-                        sender.ChangePanelVisibility()
-                        edited = True
-                    Else
-                        MsgBox("Someone is currently working on this one. It may take a moment to update the status.")
-                    End If
-                End If
-            Next
-            If edited Then
-                theOrder.SaveToDisk()
-            End If
-        End If
-
-    End Sub
 
     Dim workerAttempt As Integer = 0
     Dim workerWorked As Boolean = True
@@ -1099,10 +1016,9 @@ Class MainWindow
 
         UpdatePrepackOrders.Start()
         If Not PrepackQueueWorker.IsBusy Then
-            PPQPanel.Visibility = False
-            For Each control As Control In PPQPanel.Children
-                control.Dispose()
-            Next
+            PPQPanel.Visibility = Visibility.Hidden
+
+
             PPQPanel.Children.Clear()
 
             PrepackQueueWorker.RunWorkerAsync()
@@ -1126,7 +1042,6 @@ Class MainWindow
                     End If
                 Next
             Next
-            PopulatePPQ()
         Catch ex As Exception
             workerWorked = False
             workerEx = ex
@@ -1151,37 +1066,10 @@ Class MainWindow
 
     Private Sub PPQWorkerReport()
         If workerWorked Then
-            For Each goodOrder As PrePackQueueItem In Goods
-                If PPQPanel.Children.Count >= 20 Then
-                    Exit For
-                Else
-                    PPQPanel.Children.Add(goodOrder)
-                End If
-            Next
-            For Each shitOrder As PrePackQueueItem In Shits
-                If PPQPanel.Children.Count >= 20 Then
-                    Exit For
-                Else
-                    PPQPanel.Children.Add(shitOrder)
-                End If
-            Next
+
         Else
             displayError()
         End If
-
-        'Lets make panels appear
-        For Each order As IssueDataAndOrder In PrePackQueue
-            If order.Issue.Prepack_WorkingOnIt Then
-                'find the control
-                For Each PPQItem As PrePackQueueItem In PPQPanel.Children
-                    If PPQItem.OrderNum = order.Order.OrderId Then
-                        'PPQItem.UglyOrangePanel.Visible = True
-                    End If
-                Next
-            End If
-        Next
-
-        PPQPanel.Visibility = True
         If UpdatePrepackOrders.IsEnabled = False Then
             UpdatePrepackOrders.Start()
         End If
@@ -1195,12 +1083,20 @@ Class MainWindow
     Private Sub ScanToPrepackQueue(Sku As String)
         HighlightedOrders = Nothing
         HighlightedOrderItems = Nothing
+        PrePackQueue.Clear()
 
+        For Each order As Order In PrepackQueueBase
+            For Each issue As IssueData In order.issues
+                If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then
+                    PrePackQueue.Add(New IssueDataAndOrder(order, issue))
+                End If
+            Next
+        Next
         '03/06/2016     What the fuck is changed? Why did I make this? Also added the list clearing jsut above.
         Dim Changed As Boolean = False
         For Each order As IssueDataAndOrder In PrePackQueue
             For Each item As IssueData In order.Order.issues
-                If item.DodgySku.Substring(0, 7) = Sku.Substring(0, 7) Then
+                If item.DodgySku.Substring(0, 7) = Sku.Substring(0, 7) Then 'The question here is what happens if an order for two pack sizes of the same item goes to prepack...
                     Changed = True
                     HighlightedOrders = order.Order
                     HighlightedOrderItems = order.Issue
@@ -1212,14 +1108,13 @@ Class MainWindow
             ActivePPQTitle.Text = HighlightedOrders.OrderId + ": " + HighlightedSku.PackSize.ToString + " pack " + HighlightedSku.Title.Label
             ActivePPQLabel1.Text = "Sent by: " + Emps.FindEmployeeByID(HighlightedOrders.StateUser).FullName
             ActivePPQLabel2.Text = "Ordered: " + loader.LoadOrdex(HighlightedOrders.Filename).LinnOpenOrder.GeneralInfo.ReceivedDate.ToString
-            My.Computer.Audio.Play("bloop.wav", AudioPlayMode.Background)
-            ActivePPQCompleteButton.Visibility = True
+            ActivePPQCompleteButton.Visibility = Visibility.Visible
 
         Else
             ActivePPQTitle.Text = "-------: Not on order"
             ActivePPQLabel1.Text = "-"
             ActivePPQLabel2.Text = "-"
-            ActivePPQCompleteButton.Visibility = False
+            ActivePPQCompleteButton.Visibility = Visibility.Hidden
         End If
     End Sub
 
@@ -1228,29 +1123,14 @@ Class MainWindow
     Public Sub PerformClick(Button As System.Windows.Controls.Button)
         Button.RaiseEvent(New RoutedEventArgs(System.Windows.Controls.Button.ClickEvent))
     End Sub
-    Public Function EMsgbox(ByVal Prompt As String, Style As MsgBoxStyle, Title As String) As Object
-        If IsNothing(Title) Then
-            Title = "Alert"
-        End If
-        If IsNothing(Style) Then
-            Style = 0
-        End If
-        Dim dialog As New MsgBoxDialog
-        dialog.SetData(Prompt, Style, Title)
-        Return dialog.ShowDialog
-    End Function
-    'Public Function EMsgbox(ByVal Prompt As String, ByVal Optional Style As MsgBoxStyle = 0, ByVal Optional Title As String = "Alert") As Object
-    '    Dim dialog As New MsgBoxDialog
-    '    dialog.SetData(Prompt, Style, Title)
-    '    Return dialog.ShowDialog
-    'End Function
+
     Friend DataRefresher As New System.Windows.Threading.DispatcherTimer
     Friend Clock As New System.Windows.Threading.DispatcherTimer
     Friend SkuCacheINitLoader As New System.Windows.Threading.DispatcherTimer
     Friend AdminStatusUpdater As New System.Windows.Threading.DispatcherTimer
     Friend UpdatePrepackOrders As New System.Windows.Threading.DispatcherTimer
     Friend Sub LoadTimers()
-        AddHandler ScanFocusBox.KeyDown, AddressOf ScanFocusBox_KeyDown
+
         AddHandler DataRefresher.Tick, AddressOf DataRefresher_Tick
         AddHandler SkuCacheINitLoader.Tick, AddressOf SkuCacheInitLoader_Tick
         AddHandler Clock.Tick, AddressOf Clock_Tick
