@@ -1,7 +1,4 @@
 ﻿Imports LoginModule
-Imports Microsoft.VisualBasic
-Imports Microsoft.VisualBasic.CompilerServices
-
 Imports Spire.Barcode
 Imports System
 Imports System.Collections
@@ -28,8 +25,9 @@ Class MainWindow
     Public logins As FullscreenLogin = New FullscreenLogin
     Private NewScan As Boolean = False
     Public NoBox As Boolean = False
-    Public PrepackInfo As ArrayList = New ArrayList
+    Public Shared PrepackInfo As ArrayList = New ArrayList
     Public Shared PrinterName As String = ""
+
     Private pritinglabel As String
     Private PritingLabelID As Integer = 1
     Public SelectedSKU As WhlSKU
@@ -41,6 +39,7 @@ Class MainWindow
     Private Skus As New WHLClasses.SkuCollection(True)
     Private labels As New WHLClasses.LabelMaker
 
+    Dim client As Services.OrderServer.iOSClientChannel
     '27/08/16
     Dim CurrentEmployeeAnalytic As WarehouseAnalytics.AnalyticBase
     Dim CurrentAnalyticSession As WarehouseAnalytics.SessionAnalytic
@@ -55,7 +54,8 @@ Class MainWindow
     End Sub
 
     Private Sub keyPrint_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles keyPrint.Click
-
+        Dim PrinterSettings As New PrinterSettings
+        PrinterName = PrinterSettings.PrinterName
         'Print quantity. 
         Dim printquantity As Integer = 1
         Dim CheckLength As String = Keypaddisp.Text
@@ -65,7 +65,7 @@ Class MainWindow
 
 
         ' COMPLETELY REDO PRINTING CODE TO USE LABELGENERATOR
-        If Me.PritingLabelID = 1 Then               'Prepack
+        If PritingLabelID = 1 Then               'Prepack
             If IsNothing(SelectedSKU) Then
                 Dim EMsgBox As New WPFMsgBoxDialog
 
@@ -105,7 +105,7 @@ Class MainWindow
                 End Try
 
             End If
-        ElseIf Me.PritingLabelID = 2 Then          'Shelf
+        ElseIf PritingLabelID = 2 Then          'Shelf
             If printquantity > 5 Then
                 printquantity = 5
             End If
@@ -129,7 +129,7 @@ Class MainWindow
                     MsgBox("Something went wrong." + vbNewLine + exString)
                 End If
             End If
-        ElseIf Me.PritingLabelID = 3 Then           'Magnet
+        ElseIf PritingLabelID = 3 Then           'Magnet
             If printquantity > 5 Then
                 printquantity = 5
             End If
@@ -152,7 +152,7 @@ Class MainWindow
                     MsgBox("Something went wrong." + vbNewLine + exString)
                 End If
             End If
-        ElseIf Me.PritingLabelID = 5 Then           'PPready
+        ElseIf PritingLabelID = 5 Then           'PPready
             If printquantity > 20 Then
                 printquantity = 20
             End If
@@ -175,7 +175,7 @@ Class MainWindow
                     MsgBox("Something went wrong." + vbNewLine + exString)
                 End If
             End If
-        ElseIf Me.PritingLabelID = 4 Then           'Autobag
+        ElseIf PritingLabelID = 4 Then           'Autobag
             If IsNothing(SelectedSKU) Then
                 Dim EMsgBox As New WPFMsgBoxDialog
 
@@ -183,7 +183,7 @@ Class MainWindow
                 EMsgBox.ShowDialog()
             Else
                 Dim EMsgBox As New WPFMsgBoxDialog
-                EMsgBox.Title.Text = "Autobag"
+                EMsgBox.DialogTitle.Text = "Autobag"
                 EMsgBox.Body.Text = "Make sure you clear the previous job first."
                 EMsgBox.ShowDialog()
                 'It's all good. 
@@ -224,35 +224,36 @@ Class MainWindow
         ChooseLabel(1)
 
     End Sub
-
+#Region "Choose Label"
     Private Sub Label5_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PrePackLabel.Click, PrepackLabelButton.Click
-        Me.ChooseLabel(1)
+        ChooseLabel(1)
     End Sub
     Private Sub Label6_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ShelfLabelButton.Click, ShelfLabelBG.Click
-        Me.ChooseLabel(2)
+        ChooseLabel(2)
     End Sub
 
     Private Sub Label7_Click(ByVal sender As Object, ByVal e As EventArgs) Handles MagnetLabelButton.Click, MagnetLabelBG.Click
-        Me.ChooseLabel(3)
+        ChooseLabel(3)
     End Sub
 
     Private Sub Label8_Click(ByVal sender As Object, ByVal e As EventArgs) Handles AutobagButton.Click
-        Me.ChooseLabel(4)
+        ChooseLabel(4)
     End Sub
 
     Private Sub PPReadyText_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PPReadyText.Click
-        Me.ChooseLabel(5)
+        ChooseLabel(5)
     End Sub
-
+#End Region
+#Region "Application Startup Events"
     Private Sub Main_Activated(ByVal sender As Object, ByVal e As EventArgs) Handles Me.ContentRendered
         UpdateLoginInfo()
         ScanFocusBox.Focus()
 
         Try
             If logins.AuthenticatedUser.Permissions.PrepackAdmin Then
-                PrepackAdminPanel.Visibility = True
+                PrepackAdminPanel.Visibility = Visibility.Visible
             Else
-                PrepackAdminPanel.Visibility = False
+                PrepackAdminPanel.Visibility = Visibility.Hidden
             End If
         Catch ex As Exception
 
@@ -263,7 +264,7 @@ Class MainWindow
 
     Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles Me.Closing
         'e.Cancel = True
-        Me.logins.LogoutUser(RuntimeHelpers.GetObjectValue(sender))
+        logins.LogoutUser(RuntimeHelpers.GetObjectValue(sender))
         UnregisterAnalyticUser() '27/08/16
         'End
     End Sub
@@ -278,54 +279,63 @@ Class MainWindow
             EMsgBox.ShowDialog()
 
         Else
-            Me.PrepackInfo = response
+            PrepackInfo = response
         End If
 
 
         LoadTimers()
-        Me.Synthesizer = New SpeechSynthesizer
-        Me.Synthesizer.SetOutputToDefaultAudioDevice()
+        Synthesizer = New SpeechSynthesizer
+        Synthesizer.SetOutputToDefaultAudioDevice()
+
+        Try
+            client = Services.OrderServer.ConnectChannel("net.tcp://orderserver.ad.whitehinge.com:801/OrderServer/1/")
+        Catch ex As Exception
+            client = Nothing
+        End Try
 
 
     End Sub
 
     Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
         ScanFocusBox.Focus()
-        Me.logins.Standalone = False
-        Me.logins.InitAuth()
+        logins.Standalone = False
+        logins.InitAuth()
         AddHandler logins.Shown, AddressOf UnregisterAnalyticUser
         Dim enumerator As IEnumerator
+        'Try
+        '    enumerator = PrinterSettings.InstalledPrinters.GetEnumerator
+        '    Do While enumerator.MoveNext
+        '        Dim str As String = enumerator.Current.ToString
+
+        '        Dim printerbutton As New Printerbutton
+        '        printerbutton.PrinterText = str
+        '        printerbutton.Background = New SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 0))
+        '        printerbutton.Visibility = Visibility.Visible
+        '        printerbutton.InitializeComponent()
+
+        '        PrinterButtons.Children.Add(printerbutton)
+        '        PrinterName = str
+        '    Loop
+        'Finally
+        '    Try
+
+        '        If TypeOf enumerator Is IDisposable Then
+        '            TryCast(enumerator, IDisposable).Dispose()
+        '        End If
+        '    Catch ex As NullReferenceException
+        '    End Try
+
+        'End Try
+
         Try
-            enumerator = PrinterSettings.InstalledPrinters.GetEnumerator
-            Do While enumerator.MoveNext
-                Dim str As String = Conversions.ToString(enumerator.Current)
-                Dim printerbutton As New Printerbutton With {
-                    .PrinterText = str
-                }
-                PrinterButtons.Children.Add(printerbutton)
-                PrinterName = str
-            Loop
-        Finally
-            Try
-
-                If TypeOf enumerator Is IDisposable Then
-                    TryCast(enumerator, IDisposable).Dispose()
-                End If
-            Catch ex As NullReferenceException
-            End Try
-
-        End Try
-
-        Try
-            Me.logins.AppVerStr = "2.0.0.0"
+            logins.AppVerStr = "2.0.0.0"
         Catch exception1 As Exception
-            ProjectData.SetProjectError(exception1)
-            Dim exception As Exception = exception1
-            Me.logins.AppVerStr = "DEBUG"
-            ProjectData.ClearProjectError()
+            logins.AppVerStr = "DEBUG"
         End Try
-        Me.ChooseLabel(1)
+        ChooseLabel(1)
     End Sub
+#End Region
+
 
     Private Sub Packsizes_SelectedIndexChanged(ByVal sender As Object, ByVal e As SelectionChangedEventArgs) Handles Packsizes.SelectionChanged
         If Packsizes.SelectedItems.Count > 0 Then
@@ -338,10 +348,11 @@ Class MainWindow
                 End If
             Next
             ScanFocusBox.Focus()
-            Me.GetHistory()
+            GetHistory()
         End If
 
     End Sub
+    Public Shared NoteInfoShared As String = ""
 
     Private Sub UpdateFromPacksize()
         'Updates packs-sensitive stuff from the child SKU. 
@@ -355,9 +366,20 @@ Class MainWindow
                 If Bag.Text.Length < 2 Or Bag.Text = "Never Bagged" Then
                     ChangeButton.RaiseEvent(New RoutedEventArgs(System.Windows.Controls.Button.ClickEvent, ChangeButton))
                 End If
-                Screws.Visibility = SelectedSKU.ExtendedProperties.HasScrews
-                Pair.Visibility = SelectedSKU.ExtendedProperties.IsPair
+                If SelectedSKU.ExtendedProperties.HasScrews Then
+                    Screws.Visibility = Visibility.Visible
+                Else
+                    Screws.Visibility = Visibility.Hidden
+                End If
+
+                If SelectedSKU.ExtendedProperties.IsPair Then
+                    Pair.Visibility = Visibility.Visible
+                Else
+
+                    Pair.Visibility = Visibility.Hidden
+                End If
                 EnvelopeBox.Text = SelectedSKU.ExtendedProperties.Envelope
+
             End If
         Next
         'Now that's out the way, I don't actually think there's anything else to do other than print. Cool. 
@@ -365,7 +387,7 @@ Class MainWindow
     End Sub
 
     Private Sub ButtonLogout(ByVal sender As Object, ByVal e As EventArgs) Handles PictureBox1.MouseUp, UserName.MouseUp, UserTime.MouseUp, PictureBox1.TouchUp, UserName.TouchUp, UserTime.TouchUp
-        Me.logins.LogoutUser(sender)
+        logins.LogoutUser(sender)
         UnregisterAnalyticUser() '27/08/16
     End Sub
 
@@ -374,18 +396,18 @@ Class MainWindow
     End Sub
 
     Private Sub ResetDisp()
-        Me.Screws.Visibility = False
-        Me.Pair.Visibility = False
-        Me.Bag.Text = ""
-        Me.NoteInfo.Text = ""
-        Me.keypaddisp.Text = ""
+        Screws.Visibility = Visibility.Hidden
+        Pair.Visibility = Visibility.Hidden
+        Bag.Text = ""
+        NoteInfo.Text = ""
+        Keypaddisp.Text = ""
     End Sub
 
     Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles ScanFocusBox.KeyDown
         If (e.Key = Key.Return) And logins.Visible = False Then
             e.Handled = True
             My.Computer.Audio.Stop()
-            Me.ExecuteSearch()
+            ExecuteSearch()
         End If
     End Sub
 
@@ -395,16 +417,16 @@ Class MainWindow
 
     Private Sub ShortSku_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ShortSku.Click
         If (Me.WindowState = WindowState.Normal) Then
-            Me.WindowState = WindowState.Maximized
+            WindowState = WindowState.Maximized
         Else
-            Me.WindowState = WindowState.Normal
+            WindowState = WindowState.Normal
         End If
     End Sub
-
+#Region "Analytics"
     Private Sub UpdateLoginInfo()
         Try
-            Me.UserName.Text = Me.logins.AuthenticatedUser.FullName
-            Me.UserTime.Text = ("Logged in: " & Me.logins.AuthdLoginTime.ToString)
+            UserName.Text = logins.AuthenticatedUser.FullName
+            UserTime.Text = ("Logged in: " & logins.AuthdLoginTime.ToString)
 
             '27/08/16
             Try
@@ -414,10 +436,8 @@ Class MainWindow
             End Try
             RegisterAnalyticUser(logins.AuthenticatedUser)
             RegisterSession()
-        Catch exception1 As Exception
-            ProjectData.SetProjectError(exception1)
-            Dim exception As Exception = exception1
-            ProjectData.ClearProjectError()
+        Catch ex As Exception
+
         End Try
     End Sub
 
@@ -464,6 +484,7 @@ Class MainWindow
             End If
         End Try
     End Sub
+#End Region
 
     'Private Sub UpdateScores()
     '    Dim enumerator As IEnumerator
@@ -571,64 +592,64 @@ Class MainWindow
 
     Private Sub ChooseLabel(ByVal labelid As Integer)
         If (labelid = 1) Then
-            If Not Me.HasAutobagHistory Then
-                Me.PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                Me.ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PritingLabelID = 1
-                Me.pritinglabel = "Prepack"
+            If Not HasAutobagHistory Then
+                PrePackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutobagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PritingLabelID = 1
+                pritinglabel = "Prepack"
             End If
         ElseIf (labelid = 2) Then
-            If Not Me.HasAutobagHistory Then
-                Me.PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                Me.MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PritingLabelID = 2
-                Me.pritinglabel = "Shelf"
+            If Not HasAutobagHistory Then
+                PrePackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutobagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PritingLabelID = 2
+                pritinglabel = "Shelf"
             End If
         ElseIf (labelid = 3) Then
-            If Not Me.HasAutobagHistory Then
-                Me.PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                Me.AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PritingLabelID = 3
-                Me.pritinglabel = "Magnet"
+            If Not HasAutobagHistory Then
+                PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PritingLabelID = 3
+                pritinglabel = "Magnet"
             End If
         ElseIf (labelid = 5) Then
-            If Not Me.HasAutobagHistory Then
-                Me.PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                Me.PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                Me.PritingLabelID = 5
-                Me.pritinglabel = "PPReady"
+            If Not HasAutobagHistory Then
+                PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                PritingLabelID = 5
+                pritinglabel = "PPReady"
             End If
         ElseIf (labelid = 4) Then
-            Me.PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            Me.ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            Me.MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            Me.AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-            Me.PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            Me.PritingLabelID = 4
-            Me.pritinglabel = "Autobag"
-            Me.HasAutobagHistory = True
-            'Me.AutobagModeHider.Visibility = True
-            Me.PrepackHighlight.Visibility = False
-            Me.ShelfLabelHighlight.Visibility = False
-            Me.MagnetLabelHighlight.Visibility = False
-            Me.PPReadyHighlight.Visibility = False
+            PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+            PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            PritingLabelID = 4
+            pritinglabel = "Autobag"
+            HasAutobagHistory = True
+
+            PrePackHighlight.Visibility = Visibility.Hidden
+            ShelfLabelHighlight.Visibility = Visibility.Hidden
+            MagnetLabelHighlight.Visibility = Visibility.Hidden
+            PPReadyHighlight.Visibility = Visibility.Hidden
         End If
     End Sub
 
     Private Sub Clock_Tick(ByVal sender As Object, ByVal e As EventArgs)
-        Me.TimeBox.Text = DateAndTime.Now.ToLongTimeString
+        TimeBox.Text = DateAndTime.Now.ToLongTimeString
     End Sub
 
     Private Sub DataRefresher_Tick(ByVal sender As Object, ByVal e As EventArgs)
@@ -675,7 +696,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
                                 Catch ex As Exception
                                 End Try
 
@@ -693,7 +714,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
                                 Catch ex As Exception
                                 End Try
 
@@ -714,7 +735,7 @@ Class MainWindow
                     Try
                         For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                             Try
-                                ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
                             Catch ex As Exception
                             End Try
 
@@ -743,7 +764,7 @@ Class MainWindow
         ScanFocusBox.Focus()
 
     End Sub
-
+    Public Shared BagShared As String = ""
     Private Sub PopulateData()
         For Each Location As SKULocation In ActiveItem.Locations
             If Location.LocationType = 2 Then
@@ -758,9 +779,9 @@ Class MainWindow
         ShortSku.Content = ActiveItem.ShortSku
 
         If ActiveItem.isBundle Then
-            BundleDetailbutton.Visibility = True
+            BundleDetailbutton.Visibility = Visibility.Visible
         Else
-            BundleDetailbutton.Visibility = False
+            BundleDetailbutton.Visibility = Visibility.Hidden
         End If
 
         '22/03/2016     Added minimum and level to stock.   
@@ -782,7 +803,8 @@ Class MainWindow
                         Dim BagNoteEditorNew As New BagNoteEditor
                         BagNoteEditorNew.ActiveSku = Child
                         BagNoteEditorNew.ShowDialog()
-
+                        NoteInfo.Text = NoteInfoShared
+                        Bag.Text = BagShared
 
                     End If
                 End If
@@ -801,6 +823,11 @@ Class MainWindow
 
         If Packsizes.Items.Count = 1 Then
             Packsizes.SelectedIndex = 0
+        Else
+            EnvelopeBox.Text = ""
+            Screws.Text = ""
+
+
         End If
     End Sub
 
@@ -812,7 +839,7 @@ Class MainWindow
             Next
             Dim EMsgBox As New WPFMsgBoxDialog
             EMsgBox.Body.Text = itemCompString
-            EMsgBox.Title.Text = "Items in Bundle:"
+            EMsgBox.DialogTitle.Text = "Items in Bundle:"
             EMsgBox.ShowDialog()
 
         End If
@@ -844,7 +871,7 @@ Class MainWindow
                     TryCast(enumerator, IDisposable).Dispose()
                 End If
             End Try
-            Me.HistoryBody.Text = (Me.HistoryBody.Text & "Anything done before 16/10/2015 has not been recorded and will not show. ")
+            HistoryBody.Text = (HistoryBody.Text & "Anything done before 16/10/2015 has not been recorded and will not show. ")
         End If
     End Sub
 
@@ -918,11 +945,6 @@ Class MainWindow
         Loader.SaveData(Skusfull)
     End Sub
 
-    Private Sub KeypadPress(sender As Object, e As EventArgs) Handles keyClear.Click, key8.Click, key7.Click, key6.Click, key5.Click, key4.Click, key3.Click, key2.Click, key1.Click, key0.Click, AutobagBG.Click
-        Keypad(sender.Content)
-        ScanFocusBox.Focus()
-    End Sub
-
     Private Sub RefreshCurrent_Click(sender As Object, e As EventArgs) Handles RefreshCurrent.Click
         For Each item As WhlSKU In ActiveChildren
             item.FullRefresh()
@@ -937,42 +959,48 @@ Class MainWindow
         '03/06/2016     Modified to implement the listyness of the highlightedorder. Basically just wrapped in a for loop ayylamow
 
 
-        'Open the highlighted order
-        Dim ordex As Linnworks.Orders.ExtendedOrder = loader.LoadOrdex(HighlightedOrders.Filename)
-        'For Each item As PickingStrictness In ordex.PickingStrictness
-        '    item = PickingStrictness.BestJudgement
-        'Next
-
-        If ordex.Status = OrderStatus._Withdrawn Then
-
+        If Not IsNothing(client) Then
+            PrepackQueueBase = client.StreamIOOrderDefinition.GetByStatus(OrderStatus._Prepack)
         Else
-
-            Dim StrictnessCount As Integer = ordex.PickingStrictness.Count - 1
-            ordex.PickingStrictness.Clear()
-            For i = 0 To StrictnessCount
-                ordex.PickingStrictness.Add(PickingStrictness.BestJudgement)
-            Next
-            For Each issue As IssueData In ordex.issues
-                If issue.IssueItemIndex = HighlightedOrderItems.IssueItemIndex Then
-                    If issue.PreferredResolutionType = Orders.ResolutionType.ResetOrderToNew Then
-                        issue.Resolved = True
-                        ordex.SetStatus(OrderStatus._New, logins.AuthenticatedUser)
-                    Else
-                        'issue.Resolved = False
-                        issue.Prepack_IssuePartlyResolveFor = True
-                    End If
-
-                End If
-            Next
-            loader.SaveDataToFile(ordex.LinnOpenOrder.NumOrderId.ToString + ".ordex", ordex, "T:\AppData\Orders")
+            PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
         End If
+        Try
+            For Each order As Order In PrepackQueueBase
+
+                For Each issue As IssueData In order.issues
+                    If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then
+                        If issue.DodgySku = HighlightedOrderItems.DodgySku Then
+                            Try
+                                Dim ResponseInsert As Object
+                                ResponseInsert = WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.prepack_test (orderid,iscomplete,pplocationname,DateCleared) VALUES ('" + order.OrderId.ToString + "', '1' , '" + System.Environment.MachineName.ToString + "','" + Now.ToShortDateString + "')")
+
+                                For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                                    Try
+                                        ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    Catch ex As Exception
+                                    End Try
+
+                                Next
+                            Catch ex As Exception
+                                MsgBox(ex.Message.ToString)
+                            End Try
+                        End If
+                    End If
+                Next
+            Next
+
+        Catch ex As Exception
+
+        End Try
 
 
         ActivePPQTitle.Text = "-------: Not on order"
         ActivePPQLabel1.Text = "-"
         ActivePPQLabel2.Text = "-"
-        ActivePPQCompleteButton.Visibility = False
-        UpdatePrepackOrders_Tick(Nothing, Nothing)
+        ActivePPQCompleteButton.Visibility = Visibility.Hidden
+
+
+        UpdatePrepackOrders_Tick()
         ScanFocusBox.Text = ""
         ScanFocusBox.Focus()
     End Sub
@@ -1005,21 +1033,11 @@ Class MainWindow
     Dim workerEx As New Exception
 
     '10/03/2016     Updates the PPQ, and tells it to populate. Will be force run when a PPQ item is "Completed"
-    Private Sub UpdatePrepackOrders_Tick(sender As Object, e As EventArgs)
-
-        'If Now > skuRefreshTime Then
-
-        '    AdminUpdate.PerformClick()
-        'Else
-        'Dim timeToGo As TimeSpan = skuRefreshTime - Now
-        'AdminUpdate.Text = "Update Cache - Full Reset in " + (Math.Floor(timeToGo.TotalMinutes)).ToString + "mins"
+    Private Sub UpdatePrepackOrders_Tick()
 
         UpdatePrepackOrders.Start()
         If Not PrepackQueueWorker.IsBusy Then
-            PPQPanel.Visibility = Visibility.Hidden
 
-
-            PPQPanel.Children.Clear()
 
             PrepackQueueWorker.RunWorkerAsync()
             workerAttempt = 0
@@ -1051,17 +1069,7 @@ Class MainWindow
     End Sub
 
     Private Sub displayError()
-        Dim ErrorLabel As New TextBlock
-        PPQPanel.Children.Clear()
-        ErrorLabel.Text = workerEx.ToString
-        ErrorLabel.Background = New SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 0, 0, 0))
-        ErrorLabel.Foreground = System.Windows.Media.Brushes.White
-        ErrorLabel.FontSize = 11.0
 
-
-        ErrorLabel.Width = 443
-        ErrorLabel.Height = 188
-        PPQPanel.Children.Add(ErrorLabel)
     End Sub
 
     Private Sub PPQWorkerReport()
@@ -1084,7 +1092,11 @@ Class MainWindow
         HighlightedOrders = Nothing
         HighlightedOrderItems = Nothing
         PrePackQueue.Clear()
-
+        If Not IsNothing(client) Then
+            PrepackQueueBase = client.StreamIOOrderDefinition.GetByStatus(OrderStatus._Prepack)
+        Else
+            PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
+        End If
         For Each order As Order In PrepackQueueBase
             For Each issue As IssueData In order.issues
                 If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then

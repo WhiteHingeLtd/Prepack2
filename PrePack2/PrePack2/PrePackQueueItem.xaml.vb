@@ -24,7 +24,7 @@ Public Class PrePackQueueItem
                             edited = True
                         Else
                             Dim MsgBox2 As New WPFMsgBoxDialog
-                            MsgBox2.Title.Text = ""
+                            MsgBox2.DialogTitle.Text = ""
                             MsgBox2.Body.Text = "Someone is currently working on this one. It may take a moment to Update the Status."
 
 

@@ -17,9 +17,10 @@
             PrinterLabel.Text = NewText
         End Set
     End Property
-    Public Sub BigClick()
+    Public Sub BigClick() Handles Me.TouchUp, Me.MouseUp
 
-        Me.Highlight(1)
+
+        Highlight(1)
         MainWindow.PrinterName = PrinterLabel.Text
     End Sub
 

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PrePack2"
-             mc:Ignorable="d" d:DesignWidth="300" Width="89" Height="102" FontSize="11">
+             mc:Ignorable="d" Width="105" Height="111" FontSize="11">
     <UserControl.Resources>
         <Style x:Key="NoChromeButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
@@ -30,15 +30,15 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Grid Background="#FFC70000" Width="90">
-        <TextBlock x:Name="PrinterLabel" HorizontalAlignment="Right" Margin="0,68.87,10,0" TextWrapping="Wrap" Text="Printer" Width="74.5" TextAlignment="Center" Height="23.13" VerticalAlignment="Top" Foreground="White">
+    <Grid Background="#FFC70000">
+        <TextBlock x:Name="PrinterLabel" Margin="14.5,68.87,16,10" TextWrapping="Wrap" Text="Printer" TextAlignment="Center" Foreground="White">
             <TextBlock.InputBindings>
                 <MouseBinding  MouseAction="LeftClick"/>
             </TextBlock.InputBindings>
         </TextBlock>
-        <Button x:Name="ImageButton1" Style="{DynamicResource NoChromeButton}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="68.5" Height="53.87">
+        <Button x:Name="ImageButton1" Style="{DynamicResource NoChromeButton}" HorizontalAlignment="Center" Margin="20.5,10,16,0" VerticalAlignment="Top" Width="68.5" Height="53.87">
             <Image Source="/PrePack2;component/Resources/print icon.png"/>
         </Button>
-        
+
     </Grid>
 </UserControl>

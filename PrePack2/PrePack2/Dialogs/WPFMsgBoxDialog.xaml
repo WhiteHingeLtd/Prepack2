@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrePack2"
         mc:Ignorable="d"
-        Title="WPFMsgBoxDialog" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize">
+        Title="WPFMsgBoxDialog" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TextBlock x:Name="Title" Margin="10,10,10,364.04" TextWrapping="Wrap" Text="Error" FontSize="48" TextAlignment="Center"/>
+        <TextBlock x:Name="DialogTitle" Margin="10,10,10,364.04" TextWrapping="Wrap" Text="Error" FontSize="48" TextAlignment="Center"/>
         <Button x:Name="CloseButton" Content="OK" Margin="172,370,172,10" BorderBrush="#FF707070" Background="{x:Null}" FontSize="36"/>
         <TextBlock x:Name="Body" HorizontalAlignment="Left" Margin="10,90.96,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="274.04" Width="430" FontSize="36" TextAlignment="Center" Text="Someone is currently working on this item. Please scan another."/>
 

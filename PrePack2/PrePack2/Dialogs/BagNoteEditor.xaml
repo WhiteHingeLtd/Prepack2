@@ -25,7 +25,7 @@
             </GroupBox>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="88" Margin="0,632,0,0" VerticalAlignment="Top" Width="1280">
-            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Current Pack Size:" VerticalAlignment="Top" Height="68" Width="680.29" FontSize="26"/>
+            <TextBlock x:Name="Packsize" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Current Pack Size:" VerticalAlignment="Top" Height="68" Width="680.29" FontSize="26"/>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="632" Margin="195,0,0,0" VerticalAlignment="Top" Width="351">
             <Grid.RowDefinitions>
