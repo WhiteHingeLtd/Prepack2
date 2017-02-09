@@ -1,5 +1,4 @@
-﻿Imports LoginModule
-Imports Spire.Barcode
+﻿Imports Spire.Barcode
 Imports System.ComponentModel
 Imports System.Drawing.Printing
 Imports System.Runtime.CompilerServices
@@ -10,7 +9,7 @@ Imports WHLClasses.Orders
 Class MainWindow
     Public bundlepacks As String = ""
     Private HasAutobagHistory As Boolean = False
-    Public logins As FullscreenLogin = New FullscreenLogin
+
     Private NewScan As Boolean = False
     Public NoBox As Boolean = False
     Public Shared PrepackInfo As ArrayList = New ArrayList
@@ -21,6 +20,7 @@ Class MainWindow
     Public SelectedSKU As WhlSKU
     Private Synthesizer As SpeechSynthesizer
     Private Emps As New EmployeeCollection
+    Public Shared authd As Employee
     Friend PrepackQueueWorker As New BackgroundWorker
 
     Friend Skusfull As New WHLClasses.SkuCollection(True)
@@ -66,7 +66,7 @@ Class MainWindow
                 End If
                 Try
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                         Dim batch As String = WHLClasses.MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
                         labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
 
@@ -99,7 +99,7 @@ Class MainWindow
             End If
             If Not IsNothing(ActiveItem) Then
                 '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                     labels.ShelfLabel(ActiveItem, ActiveChildren, PrinterName, printquantity)
 
                     '27/08/16
@@ -123,7 +123,7 @@ Class MainWindow
             End If
             If Not IsNothing(ActiveItem) Then
                 '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                     labels.MagnetLabel(ActiveItem, PrinterName, printquantity)
 
                     '27/08/16
@@ -146,7 +146,7 @@ Class MainWindow
             End If
             If Not IsNothing(ActiveItem) Then
                 '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                     labels.PPReadyLabel(ActiveItem, PrinterName, printquantity)
 
                     '27/08/16
@@ -180,7 +180,7 @@ Class MainWindow
                 End If
                 Try
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                         Dim batch As String = WHLClasses.MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
                         labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
 
@@ -208,7 +208,7 @@ Class MainWindow
 
         ScanBox.Clear()
         ScanBox.Focus()
-        'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
+        'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
         ChooseLabel(1)
 
     End Sub
@@ -237,22 +237,14 @@ Class MainWindow
         UpdateLoginInfo()
         ScanBox.Focus()
 
-        Try
-            If logins.AuthenticatedUser.Permissions.PrepackAdmin Then
-                PrepackAdminPanel.Visibility = Visibility.Visible
-            Else
-                PrepackAdminPanel.Visibility = Visibility.Hidden
-            End If
-        Catch ex As Exception
 
-        End Try
 
 
     End Sub
 
     Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles Me.Closing
         'e.Cancel = True
-        logins.LogoutUser(RuntimeHelpers.GetObjectValue(sender))
+
         UnregisterAnalyticUser() '27/08/16
         'End
     End Sub
@@ -286,15 +278,11 @@ Class MainWindow
 
     Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
         ScanBox.Focus()
-        logins.Standalone = False
-        logins.InitAuth()
-        AddHandler logins.Shown, AddressOf UnregisterAnalyticUser
+        Dim LoginBox As New WPFLoginScreen
+        LoginBox.ShowDialog()
 
-        Try
-            logins.AppVerStr = "2.0.0.0"
-        Catch exception1 As Exception
-            logins.AppVerStr = "DEBUG"
-        End Try
+
+
         ChooseLabel(1)
     End Sub
 #End Region
@@ -350,8 +338,13 @@ Class MainWindow
     End Sub
 
     Private Sub ButtonLogout(ByVal sender As Object, ByVal e As EventArgs) Handles PictureBox1.MouseUp, UserName.MouseUp, UserTime.MouseUp, PictureBox1.TouchUp, UserName.TouchUp, UserTime.TouchUp
-        logins.LogoutUser(sender)
+        authd = Nothing
         UnregisterAnalyticUser() '27/08/16
+
+        Dim Login As New WPFLoginScreen
+        Login.ShowDialog()
+
+
     End Sub
 
 
@@ -364,7 +357,7 @@ Class MainWindow
     End Sub
 
     Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles ScanBox.KeyDown
-        If (e.Key = Key.Return) And logins.Visible = False Then
+        If (e.Key = Key.Return) Then
             e.Handled = True
             My.Computer.Audio.Stop()
             ExecuteSearch()
@@ -385,16 +378,24 @@ Class MainWindow
 #Region "Analytics"
     Private Sub UpdateLoginInfo()
         Try
-            UserName.Text = logins.AuthenticatedUser.FullName
-            UserTime.Text = ("Logged in: " & logins.AuthdLoginTime.ToString)
+            UserName.Text = authd.FullName
+            UserTime.Text = Now.ToShortTimeString
+            Try
+                If authd.Permissions.PrepackAdmin Then
+                    PrepackAdminPanel.Visibility = Visibility.Visible
+                Else
+                    PrepackAdminPanel.Visibility = Visibility.Hidden
+                End If
+            Catch ex As Exception
 
+            End Try
             '27/08/16
             Try
                 UnregisterAnalyticUser()
             Catch ex As Exception
 
             End Try
-            RegisterAnalyticUser(logins.AuthenticatedUser)
+            RegisterAnalyticUser(authd)
             RegisterSession()
         Catch ex As Exception
 
@@ -627,7 +628,8 @@ Class MainWindow
     Private Sub ProcessSearch(Data As String)
 
         If Data.StartsWith("qzu") Then
-            logins.replaceUser(Data)
+            authd = Emps.FindEmployeeByID(Convert.ToInt32(Data.Replace("qzu", "")))
+
         ElseIf (Data.Length < 2) Then
 
 
@@ -658,7 +660,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -679,7 +681,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -703,7 +705,7 @@ Class MainWindow
                     Try
                         For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                             Try
-                                ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                ActiveItem.RemoveLocation(Location.LocationID, authd)
                             Catch ex As Exception
                             End Try
 
@@ -734,7 +736,7 @@ Class MainWindow
     Private Sub ExecuteSearch()
         Dim text As String = ScanBox.Text
         If text.StartsWith("qzu") Then
-            logins.replaceUser(text)
+            authd = Emps.FindEmployeeByID(Convert.ToInt32(text.Replace("qzu", "")))
         ElseIf (text.Length > 0) Then
             If text.StartsWith("10") And text.Length = 11 Then
                 text = text.Remove(7)
@@ -762,7 +764,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    'ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -780,7 +782,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                    'ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -801,7 +803,7 @@ Class MainWindow
                     Try
                         For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                             Try
-                                'ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                'ActiveItem.RemoveLocation(Location.LocationID, authd)
                             Catch ex As Exception
                             End Try
 
@@ -918,10 +920,9 @@ Class MainWindow
         If (list.Count = 0) Then
             HistoryBody.Text = "No history found for this SKU."
         Else
-            Dim enumerator As IEnumerator
+            Dim enumerator As IEnumerator = list.GetEnumerator
             HistoryBody.Text = ""
             Try
-                enumerator = list.GetEnumerator
                 Do While enumerator.MoveNext
                     Dim current As ArrayList = DirectCast(enumerator.Current, ArrayList)
                     If (current.Item(2).ToString.Length = 0) Then
@@ -1004,7 +1005,7 @@ Class MainWindow
     Private Sub Main_FormClosed(sender As Object, e As EventArgs) Handles MyBase.Closed
         Skusfull.CAncelThreadedWorker()
         SkusFullLoaded = False
-        logins.HidePanel()
+
 
         Skusfull.DisposeThreadedWorker()
         Dim Loader As New WHLClasses.SkusDataController
@@ -1042,7 +1043,7 @@ Class MainWindow
 
                                 For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                     Try
-                                        ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                        ActiveItem.RemoveLocation(Location.LocationID, authd)
                                     Catch ex As Exception
                                     End Try
 

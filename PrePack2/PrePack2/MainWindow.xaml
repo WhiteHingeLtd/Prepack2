@@ -129,7 +129,7 @@
             <Button x:Name="keyPrint" Content="Print" Margin="1" Foreground="White" FontSize="24" Background="#66919191"/>
         </UniformGrid>
         <TextBox x:Name="ScanBox" Height="29" Margin="1557.2,489.461,1,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <Grid x:Name="PrepackAdminPanel" Height="152" Margin="1557.2,337.461,1,0" VerticalAlignment="Top">
+        <Grid x:Name="PrepackAdminPanel" Height="152" Margin="1557.2,337.461,1,0" VerticalAlignment="Top" ScrollViewer.VerticalScrollBarVisibility="Disabled" Visibility="Hidden">
             <Grid HorizontalAlignment="Left" Height="152" VerticalAlignment="Top" Width="30">
                 <Image HorizontalAlignment="Left" Height="30" Margin="0,122,0,0" VerticalAlignment="Top" Width="30" Source="Clock_Icon.png"/>
                 <Image HorizontalAlignment="Left" Height="30" Margin="0,92,0,0" VerticalAlignment="Top" Width="30" Source="refresh.png"/>

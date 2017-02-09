@@ -82,6 +82,9 @@
     <Compile Include="Dialogs\BagNoteEditor.xaml.vb">
       <DependentUpon>BagNoteEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\WPFLoginScreen.xaml.vb">
+      <DependentUpon>WPFLoginScreen.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\WPFMsgBoxDialog.xaml.vb">
       <DependentUpon>WPFMsgBoxDialog.xaml</DependentUpon>
     </Compile>
@@ -97,6 +100,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialogs\BagNoteEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\WPFLoginScreen.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -184,10 +191,6 @@
     <ProjectReference Include="..\..\..\LinnworksNetSDK\Linnworks\src\net\LinnworksAPI\LinnworksAPI.csproj">
       <Project>{121d410c-db32-4245-996f-3b1134b0f181}</Project>
       <Name>LinnworksAPI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Messenger\Messenger\Messenger.vbproj">
-      <Project>{2fd87b0c-6a9f-45d9-8887-7eec32c8897f}</Project>
-      <Name>Messenger</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
