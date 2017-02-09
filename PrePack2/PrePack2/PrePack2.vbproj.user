@@ -4,4 +4,14 @@
     <RemoteDebugEnabled>true</RemoteDebugEnabled>
     <RemoteDebugMachine>Owen-Surface</RemoteDebugMachine>
   </PropertyGroup>
+  <PropertyGroup>
+    <PublishUrlHistory>V:\intra\AppPublish\PPA2\|publish\</PublishUrlHistory>
+    <InstallUrlHistory>https://apps.ad.whitehinge.com/AppPublish/PPA2/</InstallUrlHistory>
+    <SupportUrlHistory />
+    <UpdateUrlHistory />
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
 </Project>
