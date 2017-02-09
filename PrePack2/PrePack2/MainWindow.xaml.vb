@@ -1,23 +1,11 @@
 ﻿Imports LoginModule
 Imports Spire.Barcode
-Imports System
-Imports System.Collections
 Imports System.ComponentModel
-Imports System.Data
-Imports System.Deployment.Internal
-Imports System.Deployment.Application
-Imports System.Diagnostics
-Imports System.Drawing
 Imports System.Drawing.Printing
-Imports System.Reflection
 Imports System.Runtime.CompilerServices
-Imports System.Runtime.InteropServices
 Imports System.Speech.Synthesis
-Imports System.Windows.Threading
-Imports System.IO
 Imports WHLClasses
 Imports WHLClasses.Orders
-Imports LinnworksAPI
 
 Class MainWindow
     Public bundlepacks As String = ""
@@ -37,7 +25,7 @@ Class MainWindow
 
     Friend Skusfull As New WHLClasses.SkuCollection(True)
     Private Skus As New WHLClasses.SkuCollection(True)
-    Private labels As New WHLClasses.LabelMaker
+    Private labels As New LabelMaker
 
     Dim client As Services.OrderServer.iOSClientChannel
     '27/08/16
@@ -46,11 +34,11 @@ Class MainWindow
 
     Private Sub Keypad(ByVal Key As String)
         If (Key = "Clear") Then
-            Keypaddisp.Text = ""
+            ScanBox.Text = ""
         Else
-            Keypaddisp.Text += Key
+            ScanBox.Text += Key
         End If
-        ScanFocusBox.Focus()
+
     End Sub
 
     Private Sub keyPrint_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles keyPrint.Click
@@ -58,9 +46,9 @@ Class MainWindow
         PrinterName = PrinterSettings.PrinterName
         'Print quantity. 
         Dim printquantity As Integer = 1
-        Dim CheckLength As String = Keypaddisp.Text
+        Dim CheckLength As String = ScanBox.Text
         If CheckLength.Length > 0 Then
-            printquantity = Convert.ToInt32(Keypaddisp.Text)
+            printquantity = Convert.ToInt32(ScanBox.Text)
         End If
 
 
@@ -218,8 +206,8 @@ Class MainWindow
             End If
         End If
 
-        Keypaddisp.Clear()
-        ScanFocusBox.Focus()
+        ScanBox.Clear()
+        ScanBox.Focus()
         'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + logins.AuthenticatedUser.PayrollId.ToString + ",'" + logins.AuthenticatedUser.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
         ChooseLabel(1)
 
@@ -247,7 +235,7 @@ Class MainWindow
 #Region "Application Startup Events"
     Private Sub Main_Activated(ByVal sender As Object, ByVal e As EventArgs) Handles Me.ContentRendered
         UpdateLoginInfo()
-        ScanFocusBox.Focus()
+        ScanBox.Focus()
 
         Try
             If logins.AuthenticatedUser.Permissions.PrepackAdmin Then
@@ -297,35 +285,10 @@ Class MainWindow
     End Sub
 
     Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
-        ScanFocusBox.Focus()
+        ScanBox.Focus()
         logins.Standalone = False
         logins.InitAuth()
         AddHandler logins.Shown, AddressOf UnregisterAnalyticUser
-        Dim enumerator As IEnumerator
-        'Try
-        '    enumerator = PrinterSettings.InstalledPrinters.GetEnumerator
-        '    Do While enumerator.MoveNext
-        '        Dim str As String = enumerator.Current.ToString
-
-        '        Dim printerbutton As New Printerbutton
-        '        printerbutton.PrinterText = str
-        '        printerbutton.Background = New SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 0))
-        '        printerbutton.Visibility = Visibility.Visible
-        '        printerbutton.InitializeComponent()
-
-        '        PrinterButtons.Children.Add(printerbutton)
-        '        PrinterName = str
-        '    Loop
-        'Finally
-        '    Try
-
-        '        If TypeOf enumerator Is IDisposable Then
-        '            TryCast(enumerator, IDisposable).Dispose()
-        '        End If
-        '    Catch ex As NullReferenceException
-        '    End Try
-
-        'End Try
 
         Try
             logins.AppVerStr = "2.0.0.0"
@@ -347,7 +310,7 @@ Class MainWindow
                     UpdateFromPacksize()
                 End If
             Next
-            ScanFocusBox.Focus()
+            ScanBox.Focus()
             GetHistory()
         End If
 
@@ -391,19 +354,16 @@ Class MainWindow
         UnregisterAnalyticUser() '27/08/16
     End Sub
 
-    Private Sub FocusScanBox(ByVal sender As Object, ByVal e As EventArgs)
-        ScanFocusBox.Focus()
-    End Sub
 
     Private Sub ResetDisp()
         Screws.Visibility = Visibility.Hidden
         Pair.Visibility = Visibility.Hidden
         Bag.Text = ""
         NoteInfo.Text = ""
-        Keypaddisp.Text = ""
+        ScanBox.Text = ""
     End Sub
 
-    Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles ScanFocusBox.KeyDown
+    Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles ScanBox.KeyDown
         If (e.Key = Key.Return) And logins.Visible = False Then
             e.Handled = True
             My.Computer.Audio.Stop()
@@ -664,9 +624,115 @@ Class MainWindow
 
     Friend ActiveItem As WhlSKU
     Friend ActiveChildren As SkuCollection
+    Private Sub ProcessSearch(Data As String)
 
+        If Data.StartsWith("qzu") Then
+            logins.replaceUser(Data)
+        ElseIf (Data.Length < 2) Then
+
+
+        ElseIf (Data.Length > 2) Then
+            If Data.StartsWith("10") And Data.Length = 11 Then
+                Data = Data.Remove(7)
+            End If
+            NewScan = True
+            '28/01/2016     Swapped out the old raw code for the class host searching methods. 
+
+            Try
+                Dim SearchResults As SkuCollection = Skusfull.ExcludeStatus("Dead").SearchSKUS(Data)
+                If SearchResults.Count > 1 Then
+
+                    Dim AllSame As Boolean = True
+                    Dim SameVal As String = SearchResults(0).ShortSku
+                    For Each SearchRes As WhlSKU In SearchResults
+                        If SearchRes.ShortSku = SameVal Then
+                        Else
+                            AllSame = False
+                        End If
+
+                    Next
+                    If AllSame = True Then
+                        'Continue!
+                        ActiveItem = SearchResults(0)
+                        PopulateData()
+                        Try
+                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                                Try
+                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                Catch ex As Exception
+                                End Try
+
+                            Next
+                        Catch ex As Exception
+                            Dim EMsgBox As New WPFMsgBoxDialog
+
+                            EMsgBox.Body.Text = ex.Message.ToString
+                            EMsgBox.ShowDialog()
+                        End Try
+                    Else
+                        'Got a choice here kid. 
+                        Synthesizer.SpeakAsync("Choose the correct item from the list.")
+                        'BundleDialog.bundleoptionsal = SearchResults
+                        'BundleDialog.ShowDialog()
+                        'ActiveItem = BundleDialog.chosenshsku
+                        PopulateData()
+                        Try
+                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                                Try
+                                    ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                                Catch ex As Exception
+                                End Try
+
+                            Next
+                        Catch ex As Exception
+                            Dim EMsgBox As New WPFMsgBoxDialog
+
+                            EMsgBox.Body.Text = ex.Message.ToString
+                            EMsgBox.ShowDialog()
+                        End Try
+                    End If
+
+                ElseIf SearchResults.Count = 0 Then
+                    'No results. RIP. 
+                    Synthesizer.SpeakAsync("Nothing found.")
+                    ResetDisp()
+                Else
+                    'Continue!
+                    ActiveItem = SearchResults(0)
+                    PopulateData()
+                    Try
+                        For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
+                            Try
+                                ActiveItem.RemoveLocation(Location.LocationID, logins.AuthenticatedUser)
+                            Catch ex As Exception
+                            End Try
+
+                        Next
+                    Catch ex As Exception
+                        MsgBox(ex.Message.ToString)
+                    End Try
+
+                End If
+            Catch ex As Exception
+                Dim EMsgBox As New WPFMsgBoxDialog
+
+                EMsgBox.Body.Text = "Couldn't search because the system is too busy, please try again in a few minutes."
+                EMsgBox.ShowDialog()
+
+            End Try
+
+
+        Else
+            Dim EMsgBox As New WPFMsgBoxDialog
+
+            EMsgBox.Body.Text = "We couldn't recognise that barcode, Please try again."
+            EMsgBox.ShowDialog()
+        End If
+        ScanBox.Text = ""
+        ScanBox.Focus()
+    End Sub
     Private Sub ExecuteSearch()
-        Dim text As String = ScanFocusBox.Text
+        Dim text As String = ScanBox.Text
         If text.StartsWith("qzu") Then
             logins.replaceUser(text)
         ElseIf (text.Length > 0) Then
@@ -760,8 +826,8 @@ Class MainWindow
             EMsgBox.Body.Text = "We couldn't recognise that barcode, Please try again."
             EMsgBox.ShowDialog()
         End If
-        ScanFocusBox.Text = ""
-        ScanFocusBox.Focus()
+        ScanBox.Text = ""
+        ScanBox.Focus()
 
     End Sub
     Public Shared BagShared As String = ""
@@ -883,7 +949,7 @@ Class MainWindow
             Dialog.ShowDialog()
 
 
-            ScanFocusBox.Focus()
+            ScanBox.Focus()
         End If
 
     End Sub
@@ -891,7 +957,7 @@ Class MainWindow
 
     Private Sub KeypadPress(sender As Button, e As EventArgs) Handles KeyClear.Click, Key8.Click, Key7.Click, Key6.Click, Key5.Click, Key4.Click, Key3.Click, Key2.Click, Key1.Click, key0.Click, AutobagBG.Click
         Keypad(sender.Content.ToString)
-        ScanFocusBox.Focus()
+        ScanBox.Focus()
     End Sub
 
     Dim SkusFullLoaded As Boolean = False
@@ -1001,8 +1067,8 @@ Class MainWindow
 
 
         UpdatePrepackOrders_Tick()
-        ScanFocusBox.Text = ""
-        ScanFocusBox.Focus()
+        ScanBox.Text = ""
+        ScanBox.Focus()
     End Sub
 
     'Stupid Classes yay.

@@ -31,19 +31,18 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid Height="27.212" VerticalAlignment="Top"/>
-        <Label Content="Average" HorizontalAlignment="Left" Margin="10,0,0,894.327" VerticalAlignment="Bottom" FontWeight="Bold" Width="61.5" Height="25" Foreground="White"/>
-        <Label Content="Packs" HorizontalAlignment="Left" Margin="93.333,0,0,894.327" VerticalAlignment="Bottom" Width="66.5" FontWeight="Bold" Height="25" Foreground="White"/>
-        <Grid x:Name="StockGrid" HorizontalAlignment="Left" Height="28" Margin="10,0,0,924.327" VerticalAlignment="Bottom" Width="293.333">
+        <Label Content="Average" HorizontalAlignment="Left" Margin="10,0,0,894.327" VerticalAlignment="Bottom" FontWeight="Bold" Width="83.333" Height="25" Foreground="White"/>
+        <Label Content="Packs" HorizontalAlignment="Left" Margin="93.333,0,0,894.327" VerticalAlignment="Bottom" Width="79.667" FontWeight="Bold" Height="25" Foreground="White"/>
+        <Grid x:Name="StockGrid" HorizontalAlignment="Left" Height="33" Margin="10,0,0,919.327" VerticalAlignment="Bottom" Width="293.333">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="227*"/>
-                <ColumnDefinition Width="66*"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Label Content="Stock:" FontWeight="Bold" Margin="0,4,0,0" HorizontalAlignment="Left" Width="131.09" Foreground="White"/>
-            <TextBlock x:Name="Stock" HorizontalAlignment="Left" Margin="44.59,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="248.743" Grid.ColumnSpan="2"/>
+            <Label Content="Stock:" FontWeight="Bold" HorizontalAlignment="Left" Width="68.423" Foreground="White" FontSize="20"/>
+            <TextBlock x:Name="Stock" HorizontalAlignment="Left" Margin="68.423,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="224.91" FontSize="20" Foreground="White" Height="33"/>
         </Grid>
         <Grid x:Name="CodesGrid" HorizontalAlignment="Left" Height="25.96" Margin="10,0,0,951.317" VerticalAlignment="Bottom" Width="419.333">
-            <Label Content="Codes:&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55.993" FontWeight="Bold" Margin="0,0,0,-6.001" FontSize="16" Height="31.961" Foreground="White"/>
-            <TextBlock x:Name="Codes" HorizontalAlignment="Left" Margin="55.993,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="363.34" Height="23.96"/>
+            <Label Content="Codes:&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55.993" FontWeight="Bold" Margin="0,-6.001,0,0" FontSize="16" Height="31.961" Foreground="White"/>
+            <TextBlock x:Name="Codes" HorizontalAlignment="Left" Margin="55.993,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="363.34" Height="23.96" Foreground="White" FontSize="20"/>
         </Grid>
         <Grid x:Name="LabelShortTitleGrid" Margin="10,10,323.6,980.287">
             <Grid.ColumnDefinitions>
@@ -109,7 +108,6 @@
             </Grid>
             <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.173,22.47,0.335,372.57" BorderBrush="White" Background="#FF5B5B5B" Foreground="White"/>
         </Grid>
-        <TextBox x:Name="ScanFocusBox" Height="23" Margin="1247.5,0,367.8,912.539" TextWrapping="Wrap" VerticalAlignment="Bottom" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}"/>
         <GroupBox Header="Labels Printed" Height="323.117" Margin="1159.332,212.344,549.332,0" VerticalAlignment="Top" Foreground="White" BorderBrush="White">
             <TextBlock x:Name="LabelsNames" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Loading...." VerticalAlignment="Top" Height="299.96" Margin="0,0,-2,0" Width="201.336" Foreground="White"/>
         </GroupBox>
@@ -130,7 +128,7 @@
             <Button x:Name="key0" Content="0" Margin="1" Foreground="White" FontSize="53.333" Background="#66919191"/>
             <Button x:Name="keyPrint" Content="Print" Margin="1" Foreground="White" FontSize="24" Background="#66919191"/>
         </UniformGrid>
-        <TextBox x:Name="Keypaddisp" Height="29" Margin="1557.2,489.461,1,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <TextBox x:Name="ScanBox" Height="29" Margin="1557.2,489.461,1,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <Grid x:Name="PrepackAdminPanel" Height="152" Margin="1557.2,337.461,1,0" VerticalAlignment="Top">
             <Grid HorizontalAlignment="Left" Height="152" VerticalAlignment="Top" Width="30">
                 <Image HorizontalAlignment="Left" Height="30" Margin="0,122,0,0" VerticalAlignment="Top" Width="30" Source="Clock_Icon.png"/>
