@@ -19,22 +19,28 @@ Public Class WPFLoginScreen
             End Try
 
         ElseIf Data.Length > 0 And Data.Length < 3 Then
-            LoginTitle.Text = empcol.FindEmployeeByID(Convert.ToInt32(Data)).FullName + " Please enter your Pin"
-            CurrentEmployee = empcol.FindEmployeeByID(Convert.ToInt32(Data))
+            If IsNumeric(Data) Then
+                LoginTitle.Text = empcol.FindEmployeeByID(Convert.ToInt32(Data)).FullName + " Please enter your Pin"
+                CurrentEmployee = empcol.FindEmployeeByID(Convert.ToInt32(Data))
 
-            RequiresPin = True
-        ElseIf Data.Length = 4 And RequiresPin = True Then
-            If CurrentEmployee.CheckPin(Data) Then
-                MainWindow.authd = CurrentEmployee
-                Me.Close()
-            Else
-                Dim Msg As New WPFMsgBoxDialog
-                Msg.Body.Text = "That is the wrong pin, please try again"
-                Msg.ShowDialog()
+                RequiresPin = True
+
+
             End If
 
-        Else
-            Dim Msg As New WPFMsgBoxDialog
+        ElseIf RequiresPin = True Then
+            If CurrentEmployee.CheckPin(Data) Then
+                MainWindow.authd = CurrentEmployee
+                RequiresPin = False
+                Me.Close()
+                Else
+                    Dim Msg As New WPFMsgBoxDialog
+                    Msg.Body.Text = "That is the wrong pin, please try again"
+                    Msg.ShowDialog()
+                End If
+
+            Else
+                Dim Msg As New WPFMsgBoxDialog
             Msg.Body.Text = "We were unable to find your user, please try again"
             Msg.ShowDialog()
         End If
