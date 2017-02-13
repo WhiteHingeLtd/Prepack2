@@ -22,10 +22,14 @@ Class MainWindow
     Private Emps As New EmployeeCollection
     Public Shared authd As Employee
     Friend PrepackQueueWorker As New BackgroundWorker
+    Private LocationReferenceLoader As New BackgroundWorker
+    Private PrepackStatsWorker As New BackgroundWorker
 
     Friend Skusfull As New WHLClasses.SkuCollection(True)
     Private Skus As New WHLClasses.SkuCollection(True)
     Private labels As New LabelMaker
+    Public PrepackInfoDict As New Dictionary(Of String, String)
+    Public LocationReferenceDict As New Dictionary(Of String, String)
 
     Dim client As Services.OrderServer.iOSClientChannel
     '27/08/16
@@ -236,10 +240,6 @@ Class MainWindow
     Private Sub Main_Activated(ByVal sender As Object, ByVal e As EventArgs) Handles Me.ContentRendered
         UpdateLoginInfo()
         ScanBox.Focus()
-
-
-
-
     End Sub
 
     Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles Me.Closing
@@ -259,8 +259,18 @@ Class MainWindow
             EMsgBox.ShowDialog()
 
         Else
-            PrepackInfo = response
+            For Each SKU As ArrayList In response
+                PrepackInfoDict.Add(SKU(0), SKU(1))
+            Next
+
         End If
+        AddHandler PrepackStatsWorker.DoWork, AddressOf UpdateScores
+        AddHandler PrepackStatsWorker.RunWorkerCompleted, AddressOf UpdateScoresOnScreen
+        AddHandler LocationReferenceLoader.DoWork, AddressOf LoadLocationReference
+        If Not LocationReferenceLoader.IsBusy Then
+            LocationReferenceLoader.RunWorkerAsync()
+        End If
+
 
 
         LoadTimers()
@@ -275,6 +285,15 @@ Class MainWindow
 
 
     End Sub
+    Private Function LoadLocationReference()
+        Dim Locations As ArrayList = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.locationreference;")
+        For Each Location As ArrayList In Locations
+            LocationReferenceDict.Add(Location(0), Location(1))
+
+        Next
+        Return Nothing
+    End Function
+
 
     Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
         ScanBox.Focus()
@@ -308,6 +327,8 @@ Class MainWindow
     Private Sub UpdateFromPacksize()
         'Updates packs-sensitive stuff from the child SKU. 
         'Firstly, go through the prepackinfo shitlist and find the info for this one. 
+
+
         For Each SKUList As ArrayList In PrepackInfo
             'I hate this shit so much. 
             If SKUList(0).ToString = SelectedSKU.SKU Then
@@ -446,110 +467,62 @@ Class MainWindow
         End Try
     End Sub
 #End Region
+    Dim TotalLabels As Integer = 0
+    Dim SkuCount As Integer = 0
+    Dim recordString As String = ""
+    Dim LabelNameStr As String = ""
 
-    'Private Sub UpdateScores()
-    '    Dim enumerator As IEnumerator
-    '    Dim enumerator2 As IEnumerator
-    '    Dim enumerator3 As IEnumerator
-    '    Dim enumerator4 As IEnumerator
-    '    Me.LabelsNames.Text = ""
-    '    Me.LabelsAmounts.Text = ""
-    '    Dim left As Integer = 0
-    '    Dim list As New ArrayList
-    '    Dim list2 As New ArrayList
-    '    Dim textArray1 As String() = New String() {"SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '", DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd"), "' AND DateA < '", DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd"), "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10"}
-    '    Try
-    '        list = DirectCast(WHLClasses.MySQL.SelectData(String.Concat(textArray1)), ArrayList)
+    Dim SkuNameStr As String = ""
 
-    '        Try
-    '            enumerator = list.GetEnumerator
-    '            Do While enumerator.MoveNext
-    '                Dim current As ArrayList = DirectCast(enumerator.Current, ArrayList)
-    '                Me.LabelsNames.Text = Me.LabelsNames.Text + current.Item(0) + vbNewLine
-    '                Me.LabelsAmounts.Text = (Me.LabelsAmounts.Text & current.Item(1).ToString & ChrW(13) & ChrW(10))
-    '                left = Conversions.ToInteger(Operators.AddObject(left, current.Item(1)))
-    '            Loop
-    '        Finally
-    '            If TypeOf enumerator Is IDisposable Then
-    '                TryCast(enumerator, IDisposable).Dispose()
-    '            End If
-    '        End Try
-    '        Me.TotalLabelsLab.Text = Conversions.ToString(left)
-    '        Me.SkusNames.Text = ""
-    '        Me.SkusAmounts.Text = ""
-    '        Dim num2 As Integer = 0
-    '        Dim list3 As New ArrayList
-    '        Dim list4 As New ArrayList
-    '        Dim textArray2 As String() = New String() {"SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '", DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd"), "' AND DateA < '", DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd"), "' GROUP BY UserId ORDER BY count DESC LIMIT 10"}
-    '        list3 = DirectCast(WHLClasses.MySQL.SelectData(String.Concat(textArray2)), ArrayList)
-    '        Try
-    '            enumerator2 = list3.GetEnumerator
-    '            Do While enumerator2.MoveNext
-    '                Dim list7 As ArrayList = DirectCast(enumerator2.Current, ArrayList)
-    '                Me.SkusNames.Text = Conversions.ToString(Operators.AddObject(Operators.AddObject(Me.SkusNames.Text, list7.Item(0)), ChrW(13) & ChrW(10)))
-    '                Me.SkusAmounts.Text = (Me.SkusAmounts.Text & list7.Item(1).ToString & ChrW(13) & ChrW(10))
-    '                num2 = Conversions.ToInteger(Operators.AddObject(num2, list7.Item(1)))
-    '            Loop
-    '        Finally
-    '            If TypeOf enumerator2 Is IDisposable Then
-    '                TryCast(enumerator2, IDisposable).Dispose()
-    '            End If
-    '        End Try
-    '        Me.SkusTotal.Text = Conversions.ToString(num2)
-    '        Dim flag As Boolean = True
-    '        Me.RecordDay.Text = ""
-    '        Dim list5 As New ArrayList
-    '        list5 = DirectCast(WHLClasses.MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack  GROUP BY UserId, datea ORDER BY Recs ASC;"), ArrayList)
-    '        Try
-    '            enumerator3 = list5.GetEnumerator
-    '            Do While enumerator3.MoveNext
-    '                Dim list8 As ArrayList = DirectCast(enumerator3.Current, ArrayList)
-    '                If (list8.Item(2).ToString.Length > 1) Then
-    '                    Me.RecordDay.Text = Conversions.ToString(Operators.AddObject((list8.Item(0).ToString & " labels on" & ChrW(13) & ChrW(10) & list8.Item(2).ToString & " by" & ChrW(13) & ChrW(10)), list8.Item(1)))
-    '                End If
-    '            Loop
-    '        Finally
-    '            If TypeOf enumerator3 Is IDisposable Then
-    '                TryCast(enumerator3, IDisposable).Dispose()
-    '            End If
-    '        End Try
-    '        list5 = DirectCast(WHLClasses.MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack  GROUP BY datea ORDER BY Recs DESC;"), ArrayList)
-    '        Try
-    '            enumerator4 = list5.GetEnumerator
-    '            Do While enumerator4.MoveNext
-    '                Dim list9 As ArrayList = DirectCast(enumerator4.Current, ArrayList)
-    '                If ((list9.Item(2).ToString.Length > 1) AndAlso flag) Then
-    '                    Dim textArray3 As String() = New String() {Me.RecordDay.Text, ChrW(13) & ChrW(10) & ChrW(13) & ChrW(10), list9.Item(0).ToString, " total on" & ChrW(13) & ChrW(10), list9.Item(2).ToString}
-    '                    Me.RecordDay.Text = String.Concat(textArray3)
-    '                    flag = False
-    '                End If
-    '            Loop
-    '        Finally
-    '            If TypeOf enumerator4 Is IDisposable Then
-    '                TryCast(enumerator4, IDisposable).Dispose()
-    '            End If
-    '        End Try
-    '    Catch ex As Exception
-    '        'Something failed 
+    Dim workerPrepackInfo As New ArrayList
 
-    '    End Try
-    'End Sub
+    Dim WorkerWeekTotals As New ArrayList
+    Dim WorkerWeekRecords As New ArrayList
+    Dim WorkerQuantityByUser As New ArrayList
+    Dim WorkerQuantityByDate As New ArrayList
+    Private Sub UpdateScores()
 
-    'Private Sub UpdateSpecialValues()
-    '    Me.Codes.Text = (Me.PrimarysuppnameTextBox.Text.ToUpper & " - " & Me.PrimarysuppcodeTextBox.Text)
-    '    If (Me.AltsuppnameTextBox.TextLength > 0) Then
-    '        Dim textArray1 As String() = New String() {Me.Codes.Text, ", ", Me.AltsuppnameTextBox.Text.ToUpper, " - ", Me.AltsuppcodeTextBox.Text}
-    '        Me.Codes.Text = String.Concat(textArray1)
-    '    End If
-    '    If (Me.Supp3nameTextBox.TextLength > 0) Then
-    '        Dim textArray2 As String() = New String() {Me.Codes.Text, ", ", Me.Supp3nameTextBox.Text.ToUpper, " - ", Me.Supp3codeTextBox.Text}
-    '        Me.Codes.Text = String.Concat(textArray2)
-    '    End If
-    'End Sub
+        Try
+            workerPrepackInfo = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
 
-    Private Sub WhlnewBindingSource_ListChanged(ByVal sender As Object, ByVal e As ListChangedEventArgs)
-        'Me.UpdateSpecialValues()
+            WorkerWeekTotals = WHLClasses.MySQL.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
+            WorkerWeekRecords = WHLClasses.MySQL.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
+            WorkerQuantityByUser = WHLClasses.MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
+            'WorkerQuantityByDate = SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack GROUP BY dateA ORDER BY Recs DESC;")
+
+            recordString = ""
+            LabelNameStr = ""
+
+            SkuNameStr = ""
+
+
+            For Each Al As ArrayList In WorkerWeekTotals
+                LabelNameStr += Al(0).ToString + " " + Al(1).ToString + vbNewLine
+
+            Next
+
+            For Each Al As ArrayList In WorkerWeekRecords
+                SkuNameStr += Al(0).ToString + " " + Al(1).ToString + vbNewLine
+
+            Next
+
+            For Each Al As ArrayList In WorkerQuantityByUser
+                If Al(2).ToString.Length > 1 Then
+                    recordString += Al(0).ToString + " labels on" + vbNewLine + Al(2).ToString + " by " + Al(1).ToString + vbNewLine
+                    Exit For
+                End If
+            Next
+
+        Catch ex As Exception
+
+        End Try
     End Sub
+    Private Sub UpdateScoresOnScreen()
+        LabelsNames.Text = LabelNameStr
+        SkusNames.Text = SkuNameStr
+    End Sub
+
+
 
     Private Sub ChooseLabel(ByVal labelid As Integer)
         If (labelid = 1) Then
@@ -619,7 +592,10 @@ Class MainWindow
         Catch exception1 As Exception
 
         End Try
+        If Not PrepackStatsWorker.IsBusy Then
+            PrepackStatsWorker.RunWorkerAsync()
 
+        End If
     End Sub
 
 
@@ -1227,6 +1203,7 @@ Class MainWindow
         AdminStatusUpdater.Start()
         UpdatePrepackOrders.Start()
     End Sub
+
 
 End Class
 

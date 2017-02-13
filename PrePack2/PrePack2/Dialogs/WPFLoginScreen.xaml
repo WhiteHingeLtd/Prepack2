@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrePack2"
         mc:Ignorable="d"
-        Title="WPFLoginScreen" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize" Background="{x:Null}" WindowStartupLocation="CenterScreen">
+        Title="WPFLoginScreen" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize" Background="{x:Null}" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -36,6 +36,7 @@
             <Button x:Name="KeypadEnter" Content="Enter" Foreground="White" BorderBrush="{x:Null}" Background="#72919191" FontSize="24" Margin="1.5"/>
         </UniformGrid>
         <TextBox x:Name="LoginScanBox" HorizontalAlignment="Center" Height="33" Margin="89.5,43,81.5,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="279" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontSize="24" HorizontalContentAlignment="Center"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.RowSpan="3"/>
 
     </Grid>
 </Window>
