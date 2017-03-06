@@ -106,7 +106,7 @@
                 <TextBlock x:Name="ActivePPQLabel1" HorizontalAlignment="Left" Margin="0,28.96,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="20.96" Width="237.957" Foreground="White" FontSize="16" FontFamily="Segoe UI Light"><Run Text="Sent "/><Run Text="by:"/><LineBreak/><LineBreak/></TextBlock>
                 <TextBlock x:Name="ActivePPQLabel2" HorizontalAlignment="Left" Margin="0,54.92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="28.08" Width="237.957" FontFamily="Segoe UI Light" FontSize="16" Text="Ordered:" Foreground="White"/>
             </Grid>
-            <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.173,22.47,0.335,372.57" BorderBrush="White" Background="#FF5B5B5B" Foreground="White"/>
+            <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.173,22.47,0.335,0" BorderBrush="White" Background="#FF5B5B5B" Foreground="White"/>
         </Grid>
         <GroupBox Header="Labels Printed" Height="323.117" Margin="1159.332,212.344,549.332,0" VerticalAlignment="Top" Foreground="White" BorderBrush="White">
             <TextBlock x:Name="LabelsNames" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Loading...." VerticalAlignment="Top" Height="299.96" Width="201.336" Foreground="White" Margin="0,0,-2,0"/>
@@ -169,37 +169,35 @@
             <Button x:Name="Shelf"  Margin="0,0,0,27.95" d:LayoutOverrides="Width" Foreground="White" Background="Black" FontSize="24"/>
         </Grid>
         <UniformGrid HorizontalAlignment="Left" Height="290.833" Margin="196,779.167,0,0" VerticalAlignment="Top" Width="635.667" Rows="2" Columns="3">
+            <Button x:Name="AutobagButton" Background="{x:Null}" Margin="5" VerticalContentAlignment="Stretch" Foreground="White" BorderBrush="White" BorderThickness="2" HorizontalContentAlignment="Stretch">
+                <TextBlock x:Name="AutobagText" Margin="10,10,10,10.001" FontFamily="Segoe UI Semilight" FontSize="24" Background="{x:Null}" Foreground="White" Text="Autobag" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Button x:Name="PrepackedReadyButton" Background="{x:Null}" Margin="5" VerticalContentAlignment="Stretch" Foreground="White" BorderBrush="White" BorderThickness="2" HorizontalContentAlignment="Stretch">
+                <TextBlock x:Name="PPReadyText" Margin="10,10,10,10.001" FontSize="21" FontFamily="Segoe UI Semilight" Foreground="White" Background="{x:Null}" Text="Prepacked Ready" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Button>
             <Grid>
-                <Button x:Name="AutobagButton" Margin="10,10,10,10.001" FontFamily="Segoe UI Semilight" FontSize="24" Content="Autobag" RenderTransformOrigin="0.042,0.514" Background="{x:Null}" Foreground="White" />
-                <Border x:Name="AutobagHighlight" BorderThickness="2" HorizontalAlignment="Left" Height="125.416" VerticalAlignment="Top" Width="192.556" Margin="9.333,10,0,0" BorderBrush="White"/>
+                <TextBlock x:Name="LocLbl" Margin="0" TextWrapping="Wrap" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
             </Grid>
-            <Grid>
-                <Button x:Name="PPReadyText" Margin="10,10,10,10.001" FontSize="21" FontFamily="Segoe UI Semilight" Content="Prepacked Ready" Foreground="White" Background="{x:Null}"/>
-                <Border x:Name="PPReadyHighlight" BorderThickness="2" HorizontalAlignment="Left" Height="125.417" Margin="10,10,0,0" VerticalAlignment="Top" Width="192.556" BorderBrush="White"/>
-            </Grid>
-            <Grid>
-                <TextBlock x:Name="LocLbl" HorizontalAlignment="Right" Margin="0,26.833,37.766,46.584" TextWrapping="Wrap" Width="164.79"/>
-            </Grid>
-            <Grid>
-                <Button x:Name="PrePackLabel" Margin="10,0,3.708,0" VerticalAlignment="Top" Height="97" Padding="0" Foreground="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}">
-                    <Image Source="prepacklabel.png" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Button>
-                <Button x:Name="PrepackLabelButton" Content="PrePack" Margin="10,102,10,0.001" BorderBrush="{x:Null}" Background="{x:Null}" FontSize="22" FontFamily="Segoe UI Semilight" Foreground="White"/>
-                <Border x:Name="PrePackHighlight" BorderBrush="White" BorderThickness="2" Margin="2,0,-0.667,0.001"/>
-            </Grid>
-            <Grid>
-                <Button x:Name="ShelfLabelBG" Margin="2,0,0,38.417" Foreground="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}"/>
-                <Button x:Name="ShelfLabelButton" Content="Shelf" Margin="10,106.999,0,-0.582" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Segoe UI Semilight" FontSize="22" HorizontalAlignment="Left" Width="192.556" Height="39" VerticalAlignment="Top" Foreground="White"/>
-                <Border x:Name="ShelfLabelHighlight" BorderBrush="White" BorderThickness="2" HorizontalAlignment="Left" Height="145.417" VerticalAlignment="Top" Width="210.556" Margin="2,0,-0.667,-0.001"/>
-            </Grid>
-            <Grid Margin="0,0,0,0.001">
-                <Button x:Name="MagnetLabelBG" Content="" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="209.889" Height="107" VerticalAlignment="Top" Foreground="White"/>
-                <Button x:Name="MagnetLabelButton" Content="Magnet" Background="{x:Null}" FontFamily="Segoe UI Semilight" FontSize="22" Margin="10,107,10,0" BorderBrush="{x:Null}" Foreground="White" />
-                <Border x:Name="MagnetLabelHighlight" BorderBrush="White" BorderThickness="2" Margin="2,0,-0.667,0"/>
-            </Grid>
+            <Button x:Name="PrepackLabelButton" Background="{x:Null}" Margin="5" VerticalContentAlignment="Stretch" Foreground="White" BorderBrush="White" BorderThickness="2" HorizontalContentAlignment="Stretch">
+                <Grid>
+                    <Image Source="prepacklabel.png" RenderTransformOrigin="0.5,0.5" Margin="3.562,0,3.562,23.443"/>
+                    <TextBlock x:Name="PrepackLabel" Margin="10,102,10,0.001" Background="{x:Null}" FontSize="22" FontFamily="Segoe UI Semilight" Foreground="White" Text="Prepack" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+            <Button x:Name="ShelfLabelButton" Background="{x:Null}" Margin="5" VerticalContentAlignment="Stretch" Foreground="White" BorderBrush="White" BorderThickness="2" HorizontalContentAlignment="Stretch">
+                <Grid Margin="0">
+                    <TextBlock x:Name="ShelfText" Margin="60.814,101.076,60.814,-0.924" Background="{x:Null}" FontSize="22" FontFamily="Segoe UI Semilight" Foreground="White" Text="Shelf" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+            <Button x:Name="MagnetLabelButton" Background="{x:Null}" Margin="5" VerticalContentAlignment="Stretch" Foreground="White" BorderBrush="White" BorderThickness="2" HorizontalContentAlignment="Stretch">
+                <Grid Margin="0">
+                    <TextBlock x:Name="MagnetText" Margin="60.814,101.076,60.814,-0.924" Background="{x:Null}" FontSize="22" FontFamily="Segoe UI Semilight" Foreground="White" Text="Magnet" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
 
         </UniformGrid>
         <Button x:Name="BundleDetailbutton" Content="Bundle" HorizontalAlignment="Left" Margin="1152,144.461,0,0" VerticalAlignment="Top" Width="90.5" Background="Black" BorderBrush="{x:Null}" Foreground="White" Height="23" FontSize="14"/>
+        <Grid x:Name="HideMe" Height="1080" Margin="0" Width="1920" Background="#AD000000" Visibility="Collapsed"/>
     </Grid>
 
 </Window>

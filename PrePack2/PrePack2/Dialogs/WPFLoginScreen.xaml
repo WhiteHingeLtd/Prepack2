@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrePack2"
         mc:Ignorable="d"
-        Title="WPFLoginScreen" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize" Background="{x:Null}" WindowStartupLocation="CenterOwner">
+        Title="WPFLoginScreen" Height="450" Width="450" WindowStyle="None" ResizeMode="NoResize" Background="{x:Null}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

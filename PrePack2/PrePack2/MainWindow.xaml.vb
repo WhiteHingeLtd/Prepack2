@@ -46,7 +46,10 @@ Class MainWindow
     End Sub
 
     Private Sub keyPrint_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles keyPrint.Click
-        Dim PrinterSettings As New PrinterSettings
+        If ScanBox.Text.Length = 7 Then
+            ExecuteSearch()
+        Else
+            Dim PrinterSettings As New PrinterSettings
         PrinterName = PrinterSettings.PrinterName
         'Print quantity. 
         Dim printquantity As Integer = 1
@@ -209,7 +212,7 @@ Class MainWindow
                 End Try
             End If
         End If
-
+        End If
         ScanBox.Clear()
         ScanBox.Focus()
         'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
@@ -217,14 +220,14 @@ Class MainWindow
 
     End Sub
 #Region "Choose Label"
-    Private Sub Label5_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PrePackLabel.Click, PrepackLabelButton.Click
+    Private Sub Label5_Click(ByVal sender As Object, ByVal e As RoutedEventArgs) Handles PrepackLabelButton.Click
         ChooseLabel(1)
     End Sub
-    Private Sub Label6_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ShelfLabelButton.Click, ShelfLabelBG.Click
+    Private Sub Label6_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ShelfLabelButton.Click
         ChooseLabel(2)
     End Sub
 
-    Private Sub Label7_Click(ByVal sender As Object, ByVal e As EventArgs) Handles MagnetLabelButton.Click, MagnetLabelBG.Click
+    Private Sub Label7_Click(ByVal sender As Object, ByVal e As EventArgs) Handles MagnetLabelButton.Click
         ChooseLabel(3)
     End Sub
 
@@ -232,15 +235,12 @@ Class MainWindow
         ChooseLabel(4)
     End Sub
 
-    Private Sub PPReadyText_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PPReadyText.Click
+    Private Sub PPReadyText_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PrepackedReadyButton.Click
         ChooseLabel(5)
     End Sub
 #End Region
 #Region "Application Startup Events"
-    Private Sub Main_Activated(ByVal sender As Object, ByVal e As EventArgs) Handles Me.ContentRendered
-        UpdateLoginInfo()
-        ScanBox.Focus()
-    End Sub
+
 
     Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles Me.Closing
         'e.Cancel = True
@@ -283,7 +283,13 @@ Class MainWindow
             client = Nothing
         End Try
 
-
+        ScanBox.Focus()
+        Dim LoginBox As New WPFLoginScreen
+        HideMe.Visibility = Visibility.Visible
+        LoginBox.ShowDialog()
+        HideMe.Visibility = Visibility.Collapsed
+        UpdateLoginInfo()
+        ChooseLabel(1)
     End Sub
     Private Function LoadLocationReference()
         Dim Locations As ArrayList = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.locationreference;")
@@ -294,16 +300,6 @@ Class MainWindow
         Return Nothing
     End Function
 
-
-    Private Sub Main_Shown(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
-        ScanBox.Focus()
-        Dim LoginBox As New WPFLoginScreen
-        LoginBox.ShowDialog()
-
-
-
-        ChooseLabel(1)
-    End Sub
 #End Region
 
 
@@ -360,11 +356,13 @@ Class MainWindow
 
     Private Sub ButtonLogout(ByVal sender As Object, ByVal e As EventArgs) Handles PictureBox1.MouseUp, UserName.MouseUp, UserTime.MouseUp, PictureBox1.TouchUp, UserName.TouchUp, UserTime.TouchUp
         authd = Nothing
+        UserName.Text = ""
         UnregisterAnalyticUser() '27/08/16
 
         Dim Login As New WPFLoginScreen
+        HideMe.Visibility = Visibility.Visible
         Login.ShowDialog()
-
+        HideMe.Visibility = Visibility.Collapsed
 
     End Sub
 
@@ -527,58 +525,58 @@ Class MainWindow
     Private Sub ChooseLabel(ByVal labelid As Integer)
         If (labelid = 1) Then
             If Not HasAutobagHistory Then
-                PrePackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                AutobagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                ShelfLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutobagButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackedReadyButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
                 PritingLabelID = 1
                 pritinglabel = "Prepack"
             End If
         ElseIf (labelid = 2) Then
             If Not HasAutobagHistory Then
-                PrePackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                AutobagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                MagnetLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutobagButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackedReadyButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
                 PritingLabelID = 2
                 pritinglabel = "Shelf"
             End If
         ElseIf (labelid = 3) Then
             If Not HasAutobagHistory Then
-                PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-                AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                AutobagButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackedReadyButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
                 PritingLabelID = 3
                 pritinglabel = "Magnet"
             End If
         ElseIf (labelid = 5) Then
             If Not HasAutobagHistory Then
-                PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-                PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+                PrepackLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                ShelfLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                MagnetLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                AutobagButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+                PrepackedReadyButton.BorderBrush = New SolidColorBrush(Colors.DarkRed)
                 PritingLabelID = 5
                 pritinglabel = "PPReady"
             End If
         ElseIf (labelid = 4) Then
-            PrepackHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            ShelfLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            MagnetLabelHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
-            AutoBagHighlight.BorderBrush = New SolidColorBrush(Colors.DarkRed)
-            PPReadyHighlight.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            PrepackLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            ShelfLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            MagnetLabelButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
+            AutobagButton.BorderBrush = New SolidColorBrush(Colors.DarkRed)
+            PrepackedReadyButton.BorderBrush = New SolidColorBrush(Colors.DarkBlue)
             PritingLabelID = 4
             pritinglabel = "Autobag"
             HasAutobagHistory = True
 
-            PrePackHighlight.Visibility = Visibility.Hidden
-            ShelfLabelHighlight.Visibility = Visibility.Hidden
-            MagnetLabelHighlight.Visibility = Visibility.Hidden
-            PPReadyHighlight.Visibility = Visibility.Hidden
+            PrepackLabelButton.Visibility = Visibility.Hidden
+            ShelfLabelButton.Visibility = Visibility.Hidden
+            MagnetLabelButton.Visibility = Visibility.Hidden
+            PrepackedReadyButton.Visibility = Visibility.Hidden
         End If
     End Sub
 
@@ -687,7 +685,10 @@ Class MainWindow
 
                         Next
                     Catch ex As Exception
-                        MsgBox(ex.Message.ToString)
+                        Dim EMsgBox As New WPFMsgBoxDialog
+
+                        EMsgBox.Body.Text = "Unable to load SKU Locations."
+                        EMsgBox.ShowDialog()
                     End Try
 
                 End If
@@ -810,69 +811,78 @@ Class MainWindow
     End Sub
     Public Shared BagShared As String = ""
     Private Sub PopulateData()
-        For Each Location As SKULocation In ActiveItem.Locations
-            If Location.LocationType = 2 Then
-                LocLbl.Text = LocLbl.Text + Location.LocalLocationName
+        Try
+            LocLbl.Text = ""
+            For Each Location As SKULocation In ActiveItem.Locations
+                If Location.LocationType = 2 Then
+                    LocLbl.Text = LocLbl.Text + Location.LocalLocationName
 
+                End If
+
+            Next
+            'This is where we display all the information we have. 
+            LabelShortTitle.Text = ActiveItem.Title.Label
+            Shelf.Content = ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName
+            ShortSku.Content = ActiveItem.ShortSku
+
+            If ActiveItem.isBundle Then
+                BundleDetailbutton.Visibility = Visibility.Visible
+            Else
+                BundleDetailbutton.Visibility = Visibility.Hidden
             End If
 
-        Next
-        'This is where we display all the information we have. 
-        LabelShortTitle.Text = ActiveItem.Title.Label
-        Shelf.Content = ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName
-        ShortSku.Content = ActiveItem.ShortSku
+            '22/03/2016     Added minimum and level to stock.   
+            '29/02/2016     Added stock level (total) to the screen.
+            Stock.Text = ActiveItem.Stock.Total.ToString + "(" + ActiveItem.Stock.Level.ToString + " + " + ActiveItem.Stock.Minimum.ToString + " min.)"
 
-        If ActiveItem.isBundle Then
-            BundleDetailbutton.Visibility = Visibility.Visible
-        Else
-            BundleDetailbutton.Visibility = Visibility.Hidden
-        End If
+            Packsizes.Items.Clear()
+            SalesInfo.Items.Clear()
+            'Find the children and fill those in the packs list.
+            ActiveChildren = Skusfull.GatherChildren(ActiveItem.ShortSku)
+            For Each Child As WhlSKU In ActiveChildren
+                Try
+                    If Child.NewItem.IsListed Then
+                        Packsizes.Items.Add(Child.PackSize.ToString)
+                        SalesInfo.Items.Add(Child.SalesData.WeightedAverage.ToString)
 
-        '22/03/2016     Added minimum and level to stock.   
-        '29/02/2016     Added stock level (total) to the screen.
-        Stock.Text = ActiveItem.Stock.Total.ToString + "(" + ActiveItem.Stock.Level.ToString + " + " + ActiveItem.Stock.Minimum.ToString + " min.)"
+                        '06/05/2016     Checks to see if the prepackbag is none or a blank string
+                        If Child.PrepackInfo.Bag = Nothing Or Child.PrepackInfo.Bag = "NEVER BAGGED" Or Child.PrepackInfo.Bag.Length < 2 Then
+                            Dim BagNoteEditorNew As New BagNoteEditor
+                            BagNoteEditorNew.ActiveSku = Child
+                            BagNoteEditorNew.ShowDialog()
+                            NoteInfo.Text = NoteInfoShared
+                            Bag.Text = BagShared
 
-        Packsizes.Items.Clear()
-        SalesInfo.Items.Clear()
-        'Find the children and fill those in the packs list.
-        ActiveChildren = Skusfull.GatherChildren(ActiveItem.ShortSku)
-        For Each Child As WhlSKU In ActiveChildren
-            Try
-                If Child.NewItem.IsListed Then
-                    Packsizes.Items.Add(Child.PackSize.ToString)
-                    SalesInfo.Items.Add(Child.SalesData.WeightedAverage.ToString)
-
-                    '06/05/2016     Checks to see if the prepackbag is none or a blank string
-                    If Child.PrepackInfo.Bag = Nothing Or Child.PrepackInfo.Bag = "NEVER BAGGED" Or Child.PrepackInfo.Bag.Length < 2 Then
-                        Dim BagNoteEditorNew As New BagNoteEditor
-                        BagNoteEditorNew.ActiveSku = Child
-                        BagNoteEditorNew.ShowDialog()
-                        NoteInfo.Text = NoteInfoShared
-                        Bag.Text = BagShared
-
+                        End If
                     End If
-                End If
-            Catch ex As Exception
-                Reporting.ReportException(ex, False)
-                Dim EMsgBox As New WPFMsgBoxDialog
-                EMsgBox.Body.Text = "The system was unable to display data for the pack of " + Child.PackSize.ToString
-                EMsgBox.ShowDialog()
+                Catch ex As Exception
+                    Reporting.ReportException(ex, False)
+                    Dim EMsgBox As New WPFMsgBoxDialog
+                    EMsgBox.Body.Text = "The system was unable to display data for the pack of " + Child.PackSize.ToString
+                    EMsgBox.ShowDialog()
 
-            End Try
-        Next
-        'If ActiveChildren.Count = 1 Then       '19/04/16 - Change made after "Value of 0" error.
+                End Try
+            Next
+            'If ActiveChildren.Count = 1 Then       '19/04/16 - Change made after "Value of 0" error.
 
-        '13/05/2016     Added scanning to prepack queue
-        ScanToPrepackQueue(ActiveItem.SKU)
+            '13/05/2016     Added scanning to prepack queue
+            ScanToPrepackQueue(ActiveItem.SKU)
 
-        If Packsizes.Items.Count = 1 Then
-            Packsizes.SelectedIndex = 0
-        Else
-            EnvelopeBox.Text = ""
-            Screws.Text = ""
+            If Packsizes.Items.Count = 1 Then
+                Packsizes.SelectedIndex = 0
+            Else
+                EnvelopeBox.Text = ""
+                Screws.Text = ""
 
 
-        End If
+            End If
+        Catch ex As Exception
+            Dim EMsgBox As New WPFMsgBoxDialog
+
+            EMsgBox.Body.Text = "Error populating Item Data."
+            EMsgBox.ShowDialog()
+        End Try
+
     End Sub
 
     Private Sub BundleDetailbutton_Click(sender As Object, e As EventArgs) Handles BundleDetailbutton.Click
@@ -977,17 +987,6 @@ Class MainWindow
         End Try
 
     End Sub
-
-    Private Sub Main_FormClosed(sender As Object, e As EventArgs) Handles MyBase.Closed
-        Skusfull.CAncelThreadedWorker()
-        SkusFullLoaded = False
-
-
-        Skusfull.DisposeThreadedWorker()
-        Dim Loader As New WHLClasses.SkusDataController
-        Loader.SaveData(Skusfull)
-    End Sub
-
     Private Sub RefreshCurrent_Click(sender As Object, e As EventArgs) Handles RefreshCurrent.Click
         For Each item As WhlSKU In ActiveChildren
             item.FullRefresh()
@@ -1203,7 +1202,6 @@ Class MainWindow
         AdminStatusUpdater.Start()
         UpdatePrepackOrders.Start()
     End Sub
-
 
 End Class
 
