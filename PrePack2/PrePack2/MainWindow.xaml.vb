@@ -220,7 +220,7 @@ Class MainWindow
 
         ScanBox.Clear()
         ScanBox.Focus()
-        'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
+        'MSSQLPublic.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
         ChooseLabel(1)
 
     End Sub
@@ -498,9 +498,9 @@ Class MainWindow
             workerPrepackInfo = MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
             Throw New NotImplementedException
             'ToDo
-            WorkerWeekTotals = MySQL.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
-            WorkerWeekRecords = MySQL.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
-            WorkerQuantityByUser = MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
+            WorkerWeekTotals = MSSQLPublic.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
+            WorkerWeekRecords = MSSQLPublic.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
+            WorkerQuantityByUser = MSSQLPublic.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
             'WorkerQuantityByDate = SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack GROUP BY dateA ORDER BY Recs DESC;")
 
             recordString = ""
@@ -601,7 +601,7 @@ Class MainWindow
 
     Private Sub DataRefresher_Tick(ByVal sender As Object, ByVal e As EventArgs)
         Try
-            PrepackInfo = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+            PrepackInfo = MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
         Catch exception1 As Exception
 
         End Try
@@ -916,7 +916,8 @@ Class MainWindow
 
     Private Sub GetHistory()
         Historylabel.Text = ("SKU Prepack History (" & SelectedSKU.SKU & ")")
-        Dim list As ArrayList = MySQL.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
+        Throw New NotImplementedException 
+        Dim list As ArrayList = MSSQLPublic.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
         If (list.Count = 0) Then
             HistoryBody.Text = "No history found for this SKU."
         Else
@@ -1027,7 +1028,7 @@ Class MainWindow
                     If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then
                         If issue.DodgySku = HighlightedOrderItems.DodgySku Then
                             Try
-                                MySQL.insertUpdate("INSERT INTO whldata.prepack_test (orderid,iscomplete,pplocationname,DateCleared) VALUES ('" + order.OrderId.ToString + "', '1' , '" + Environment.MachineName.ToString + "','" + Now.ToShortDateString + "')")
+                                MSSQLPublic.insertUpdate("INSERT INTO whldata.prepack_test (orderid,iscomplete,pplocationname,DateCleared) VALUES ('" + order.OrderId.ToString + "', '1' , '" + Environment.MachineName.ToString + "','" + Now.ToShortDateString + "')")
 
                                 For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                     Try
