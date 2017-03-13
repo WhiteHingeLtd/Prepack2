@@ -1,12 +1,11 @@
 ﻿Imports WHLClasses
 Public Class WPFLoginScreen
     Private RequiresPin As Boolean = False
-    Private RequiresLogin As Boolean = False
     Public empcol As New EmployeeCollection
     Private CurrentEmployee As New Employee
     Private Sub WPFLoginScreenLoad() Handles Me.Loaded
+        Focus()
         LoginScanBox.Focus()
-
     End Sub
     Private Sub ProcessData(Data As String)
         If Data.StartsWith("qzu") Then
@@ -24,7 +23,10 @@ Public Class WPFLoginScreen
                 CurrentEmployee = empcol.FindEmployeeByID(Convert.ToInt32(Data))
 
                 RequiresPin = True
+                LoginPasswordBox.Visibility = Visibility.Visible
+                LoginScanBox.Visibility = Visibility.Collapsed
 
+                LoginPasswordBox.Focus()
 
             End If
 
@@ -47,24 +49,41 @@ Public Class WPFLoginScreen
 
     End Sub
     Private Sub Keypad_Handle(sender As Object, e As RoutedEventArgs) Handles Keypad0.Click, Keypad1.Click, Keypad2.Click, Keypad3.Click, Keypad4.Click, Keypad5.Click, Keypad6.Click, Keypad7.Click, Keypad8.Click, Keypad9.Click
+        LoginPasswordBox.Password += sender.content.ToString
         LoginScanBox.Text += sender.Content.ToString
     End Sub
     Private Sub ScanBox_KeyDown(sender As Object, e As KeyEventArgs) Handles LoginScanBox.KeyDown
         If (e.Key = Key.Return) Then
             e.Handled = True
-            ProcessData(LoginScanBox.Text)
 
-            LoginScanBox.Text = ""
-            LoginScanBox.Focus()
+
+            If RequiresPin Then
+                ProcessData(LoginPasswordBox.Password)
+                LoginPasswordBox.Password = ""
+
+            Else
+                ProcessData(LoginScanBox.Text)
+                LoginScanBox.Text = ""
+            End If
+
         End If
     End Sub
     Private Sub KeypadEnter_Click(Sender As Object, e As RoutedEventArgs) Handles KeypadEnter.Click
-        ProcessData(LoginScanBox.Text)
-        LoginScanBox.Text = ""
-        LoginScanBox.Focus()
+        If RequiresPin Then
+            ProcessData(LoginPasswordBox.Password)
+            LoginPasswordBox.Password = ""
+            LoginPasswordBox.Focus()
+        Else
+            ProcessData(LoginScanBox.Text)
+            LoginScanBox.Text = ""
+        End If
     End Sub
 
     Private Sub ClearButton_Click(sender As Object, e As RoutedEventArgs) Handles ClearButton.Click
-        LoginScanBox.Text = ""
+        If RequiresPin Then
+            LoginPasswordBox.Password = ""
+        Else
+            LoginScanBox.Text = ""
+        End If
     End Sub
 End Class

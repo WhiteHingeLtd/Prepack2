@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PrePack2"
         mc:Ignorable="d"
         Closing="Main_FormClosing"
         Title="MainWindow" Height="1080" Width="1920" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="{x:Null}">
@@ -24,19 +23,10 @@
                 <GradientStop Color="#FF040476" Offset="1"/>
             </LinearGradientBrush>
         </Grid.Background>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
         <Grid Height="27.212" VerticalAlignment="Top"/>
         <Label Content="Average" HorizontalAlignment="Left" Margin="10,0,0,826.539" VerticalAlignment="Bottom" FontWeight="Bold" Width="83.333" Height="34" Foreground="White" FontSize="18"/>
         <Label Content="Packsize" HorizontalAlignment="Left" Margin="93.333,0,0,826.539" VerticalAlignment="Bottom" Width="79.667" FontWeight="Bold" Height="34" Foreground="White" FontSize="18"/>
         <Grid x:Name="StockGrid" HorizontalAlignment="Left" Height="33" Margin="10,0,0,919.327" VerticalAlignment="Bottom" Width="293.333">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
             <Label Content="Stock:" FontWeight="Bold" HorizontalAlignment="Left" Width="68.423" Foreground="White" FontSize="20"/>
             <TextBlock x:Name="Stock" HorizontalAlignment="Left" Margin="68.423,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="224.91" FontSize="20" Foreground="White" Height="33"/>
         </Grid>
@@ -45,9 +35,6 @@
             <TextBlock x:Name="Codes" HorizontalAlignment="Left" Margin="55.993,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="363.34" Height="23.96" Foreground="White" FontSize="20"/>
         </Grid>
         <Grid x:Name="LabelShortTitleGrid" Margin="10,10,323.6,980.287">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
             <TextBlock x:Name="LabelShortTitle" TextWrapping="Wrap" FontFamily="Segoe UI Semibold" FontSize="58" Margin="0,-2,10,10" Foreground="White"/>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="46" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="181">
@@ -106,7 +93,7 @@
                 <TextBlock x:Name="ActivePPQLabel1" HorizontalAlignment="Left" Margin="0,28.96,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="20.96" Width="237.957" Foreground="White" FontSize="16" FontFamily="Segoe UI Light"><Run Text="Sent "/><Run Text="by:"/><LineBreak/><LineBreak/></TextBlock>
                 <TextBlock x:Name="ActivePPQLabel2" HorizontalAlignment="Left" Margin="0,54.92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="28.08" Width="237.957" FontFamily="Segoe UI Light" FontSize="16" Text="Ordered:" Foreground="White"/>
             </Grid>
-            <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.173,22.47,0.335,0" BorderBrush="White" Background="#FF5B5B5B" Foreground="White"/>
+            <Button x:Name="ActivePPQCompleteButton" Content="Completed" Margin="238.173,22.47,0.335,0" BorderBrush="White" Background="#FF5B5B5B" Foreground="White" Visibility="Hidden"/>
         </Grid>
         <GroupBox Header="Labels Printed" Height="323.117" Margin="1159.332,212.344,549.332,0" VerticalAlignment="Top" Foreground="White" BorderBrush="White">
             <TextBlock x:Name="LabelsNames" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Loading...." VerticalAlignment="Top" Height="299.96" Width="201.336" Foreground="White" Margin="0,0,-2,0"/>
@@ -150,7 +137,7 @@
                 <RowDefinition Height="109*"/>
             </Grid.RowDefinitions>
             <TextBlock x:Name="Historylabel" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Height="35" Width="332.285" Background="#FF4B4B4B" Foreground="White" FontSize="16" TextAlignment="Center"><Run Text="Prepack History"/><LineBreak/></TextBlock>
-            <TextBlock x:Name="HistoryBody" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Height="109" Width="332.285"/>
+            <TextBlock x:Name="HistoryBody" HorizontalAlignment="Left" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Height="109" Width="332.285" Foreground="White"/>
         </Grid>
         <Grid x:Name="EnvelopeGrid" Height="23" Margin="1746.215,0,1,914.277" VerticalAlignment="Bottom">
             <TextBlock x:Name="EnvelopeBox" TextWrapping="Wrap" Text="Envelope" VerticalAlignment="Top" Height="25" Margin="0,-2,-0.215,0" Foreground="White" FontSize="20"/>

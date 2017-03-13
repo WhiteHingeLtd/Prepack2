@@ -28,7 +28,4 @@
         BigClick()
     End Sub
 
-    Private Sub printername_Click(sender As Object, e As EventArgs)
-        BigClick()
-    End Sub
 End Class

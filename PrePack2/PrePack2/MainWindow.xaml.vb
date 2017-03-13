@@ -1,7 +1,6 @@
 ﻿Imports Spire.Barcode
 Imports System.ComponentModel
 Imports System.Drawing.Printing
-Imports System.Runtime.CompilerServices
 Imports System.Speech.Synthesis
 Imports WHLClasses
 Imports WHLClasses.Orders
@@ -19,14 +18,14 @@ Class MainWindow
     Private PritingLabelID As Integer = 1
     Public SelectedSKU As WhlSKU
     Private Synthesizer As SpeechSynthesizer
-    Private Emps As New EmployeeCollection
+    ReadOnly Emps As New EmployeeCollection
     Public Shared authd As Employee
     Friend PrepackQueueWorker As New BackgroundWorker
     Private LocationReferenceLoader As New BackgroundWorker
     Private PrepackStatsWorker As New BackgroundWorker
 
-    Friend Skusfull As New WHLClasses.SkuCollection(True)
-    Private Skus As New WHLClasses.SkuCollection(True)
+    Friend Skusfull As New SkuCollection(True)
+    Private Skus As New SkuCollection(True)
     Private labels As New LabelMaker
     Public PrepackInfoDict As New Dictionary(Of String, String)
     Public LocationReferenceDict As New Dictionary(Of String, String)
@@ -46,12 +45,15 @@ Class MainWindow
     End Sub
 
     Private Sub keyPrint_BtnClick(ByVal sender As Object, ByVal e As EventArgs) Handles keyPrint.Click
-        If ScanBox.Text.Length = 7 Then
+
+        Try
+        If ScanBox.Text.Length > 6 Then
             ExecuteSearch()
         Else
             Dim PrinterSettings As New PrinterSettings
         PrinterName = PrinterSettings.PrinterName
         'Print quantity. 
+            
         Dim printquantity As Integer = 1
         Dim CheckLength As String = ScanBox.Text
         If CheckLength.Length > 0 Then
@@ -72,10 +74,66 @@ Class MainWindow
                     printquantity = 50
                 End If
                 Try
+                        '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
+                        If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                            Dim batch As String = MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
+                            labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
+
+                            '27/08/16
+                            For i As Integer = 0 To printquantity
+                                RegisterOrderAnalytic()
+                            Next
+                        Else
+                            Dim exString As String
+                            Try
+                                exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
+                            Catch ex As Exception
+                                exString = "Local location name broke - Please tell IT"
+                            End Try
+                            MsgBox("Something went wrong." + vbNewLine + exString)
+                        End If
+
+
+                    Catch ex As ArgumentException
+                        Dim EMsgBox As New WPFMsgBoxDialog
+
+                        EMsgBox.Body.Text = "This item doesn't appear to have a GS1. Please speak to IT"
+                        EMsgBox.ShowDialog()
+                    End Try
+
+                End If
+            ElseIf PritingLabelID = 2 Then          'Shelf
+                If printquantity > 5 Then
+                    printquantity = 5
+                End If
+                If Not IsNothing(ActiveItem) Then
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                        Dim batch As String = WHLClasses.MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
-                        labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
+                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                        labels.ShelfLabel(ActiveItem, ActiveChildren, PrinterName, printquantity)
+
+                        '27/08/16
+                        For i As Integer = 0 To printquantity
+                            RegisterOrderAnalytic()
+                        Next
+
+                    Else
+                        Dim exString As String
+                        Try
+                            exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
+                        Catch ex As Exception
+                            exString = "Local location name broke - Please tell IT"
+                        End Try
+                        MsgBox("Something went wrong." + vbNewLine + exString)
+                    End If
+                End If
+            ElseIf PritingLabelID = 3 Then           'Magnet
+                If printquantity > 5 Then
+                    printquantity = 5
+                End If
+                If Not IsNothing(ActiveItem) Then
+                    '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
+                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                        labels.MagnetLabel(ActiveItem, PrinterName, printquantity)
 
                         '27/08/16
                         For i As Integer = 0 To printquantity
@@ -90,129 +148,76 @@ Class MainWindow
                         End Try
                         MsgBox("Something went wrong." + vbNewLine + exString)
                     End If
+                End If
+            ElseIf PritingLabelID = 5 Then           'PPready
+                If printquantity > 20 Then
+                    printquantity = 20
+                End If
+                If Not IsNothing(ActiveItem) Then
+                    '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
+                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                        labels.PPReadyLabel(ActiveItem, PrinterName, printquantity)
 
-
-                Catch ex As ArgumentException
+                        '27/08/16
+                        For i As Integer = 0 To printquantity
+                            RegisterOrderAnalytic()
+                        Next
+                    Else
+                        Dim exString As String
+                        Try
+                            exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
+                        Catch ex As Exception
+                            exString = "Local location name broke - Please tell IT"
+                        End Try
+                        MsgBox("Something went wrong." + vbNewLine + exString)
+                    End If
+                End If
+            ElseIf PritingLabelID = 4 Then           'Autobag
+                If IsNothing(SelectedSKU) Then
                     Dim EMsgBox As New WPFMsgBoxDialog
 
-                    EMsgBox.Body.Text = "This item doesn't appear to have a GS1. Please speak to IT"
+                    EMsgBox.Body.Text = "You need to choose a packsize."
                     EMsgBox.ShowDialog()
-                End Try
-
-            End If
-        ElseIf PritingLabelID = 2 Then          'Shelf
-            If printquantity > 5 Then
-                printquantity = 5
-            End If
-            If Not IsNothing(ActiveItem) Then
-                '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                    labels.ShelfLabel(ActiveItem, ActiveChildren, PrinterName, printquantity)
-
-                    '27/08/16
-                    For i As Integer = 0 To printquantity
-                        RegisterOrderAnalytic()
-                    Next
-
                 Else
-                    Dim exString As String
-                    Try
-                        exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
-                    Catch ex As Exception
-                        exString = "Local location name broke - Please tell IT"
-                    End Try
-                    MsgBox("Something went wrong." + vbNewLine + exString)
-                End If
-            End If
-        ElseIf PritingLabelID = 3 Then           'Magnet
-            If printquantity > 5 Then
-                printquantity = 5
-            End If
-            If Not IsNothing(ActiveItem) Then
-                '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                    labels.MagnetLabel(ActiveItem, PrinterName, printquantity)
-
-                    '27/08/16
-                    For i As Integer = 0 To printquantity
-                        RegisterOrderAnalytic()
-                    Next
-                Else
-                    Dim exString As String
-                    Try
-                        exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
-                    Catch ex As Exception
-                        exString = "Local location name broke - Please tell IT"
-                    End Try
-                    MsgBox("Something went wrong." + vbNewLine + exString)
-                End If
-            End If
-        ElseIf PritingLabelID = 5 Then           'PPready
-            If printquantity > 20 Then
-                printquantity = 20
-            End If
-            If Not IsNothing(ActiveItem) Then
-                '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                    labels.PPReadyLabel(ActiveItem, PrinterName, printquantity)
-
-                    '27/08/16
-                    For i As Integer = 0 To printquantity
-                        RegisterOrderAnalytic()
-                    Next
-                Else
-                    Dim exString As String
-                    Try
-                        exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
-                    Catch ex As Exception
-                        exString = "Local location name broke - Please tell IT"
-                    End Try
-                    MsgBox("Something went wrong." + vbNewLine + exString)
-                End If
-            End If
-        ElseIf PritingLabelID = 4 Then           'Autobag
-            If IsNothing(SelectedSKU) Then
-                Dim EMsgBox As New WPFMsgBoxDialog
-
-                EMsgBox.Body.Text = "You need to choose a packsize."
-                EMsgBox.ShowDialog()
-            Else
-                Dim EMsgBox As New WPFMsgBoxDialog
-                EMsgBox.DialogTitle.Text = "Autobag"
-                EMsgBox.Body.Text = "Make sure you clear the previous job first."
-                EMsgBox.ShowDialog()
-                'It's all good. 
-                If printquantity > 50 Then
-                    printquantity = 50
-                End If
-                Try
-                    '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                        Dim batch As String = WHLClasses.MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
-                        labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
-
-                        '27/08/16
-                        For i As Integer = 0 To printquantity
-                            RegisterOrderAnalytic()
-                        Next
-                    Else
-                        Dim exString As String
-                        Try
-                            exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
-                        Catch ex As Exception
-                            exString = "Local location name broke - Please tell IT"
-                        End Try
-                        MsgBox("Something went wrong." + vbNewLine + exString)
+                    Dim EMsgBox As New WPFMsgBoxDialog
+                    EMsgBox.DialogTitle.Text = "Autobag"
+                    EMsgBox.Body.Text = "Make sure you clear the previous job first."
+                    EMsgBox.ShowDialog()
+                    'It's all good. 
+                    If printquantity > 50 Then
+                        printquantity = 50
                     End If
-                Catch ex As ArgumentException
-                    Dim EMsgBox1 As New WPFMsgBoxDialog
+                    Try
+                        '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
+                        If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                            Dim batch As String = MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
+                            labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
 
-                    EMsgBox1.Body.Text = "This Item doesn't appear to have a GS1. Please speak to IT"
-                    EMsgBox1.ShowDialog()
-                End Try
+                            '27/08/16
+                            For i As Integer = 0 To printquantity
+                                RegisterOrderAnalytic()
+                            Next
+                        Else
+                            Dim exString As String
+                            Try
+                                exString = "Local location name returned the following: " + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + vbNewLine + "Please tell IT."
+                            Catch ex As Exception
+                                exString = "Local location name broke - Please tell IT"
+                            End Try
+                            MsgBox("Something went wrong." + vbNewLine + exString)
+                        End If
+                    Catch ex As ArgumentException
+                        Dim EMsgBox1 As New WPFMsgBoxDialog
+
+                        EMsgBox1.Body.Text = "This Item doesn't appear to have a GS1. Please speak to IT"
+                        EMsgBox1.ShowDialog()
+                    End Try
+                End If
             End If
         End If
-        End If
+        Catch ex As Exception
+        End try
+
         ScanBox.Clear()
         ScanBox.Focus()
         'MySql.insertupdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")
@@ -244,15 +249,15 @@ Class MainWindow
 
     Private Sub Main_FormClosing(ByVal sender As Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles Me.Closing
         'e.Cancel = True
-
+        Process.Start("Explorer.exe")
         UnregisterAnalyticUser() '27/08/16
         'End
     End Sub
 
     Private Sub Main_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
-
+        Process.Start("taskkill.exe", "/f /im explorer.exe")
         BarcodeSettings.ApplyKey("LJG05B1M4RS-FOTV9-JSHEF-CQOHO")
-        Dim response As Object = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+        Dim response As Object = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
         If response.GetType Is "".GetType Then
             Dim EMsgBox As New WPFMsgBoxDialog
             EMsgBox.Body.Text = "Couldn't load Prepack Info"
@@ -283,6 +288,15 @@ Class MainWindow
             client = Nothing
         End Try
 
+        SkusFullLoaded = False
+        Dim Loader2 As New GenericDataController
+        Try
+            Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
+            Skus = Skusfull.MakeMixdown
+        Catch ex As Exception
+            MsgBox(ex.Message.ToString)
+        End Try
+
         ScanBox.Focus()
         Dim LoginBox As New WPFLoginScreen
         HideMe.Visibility = Visibility.Visible
@@ -292,7 +306,7 @@ Class MainWindow
         ChooseLabel(1)
     End Sub
     Private Function LoadLocationReference()
-        Dim Locations As ArrayList = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.locationreference;")
+        Dim Locations As ArrayList = MySQL.SelectData("SELECT * FROM whldata.locationreference;")
         For Each Location As ArrayList In Locations
             LocationReferenceDict.Add(Location(0), Location(1))
 
@@ -332,7 +346,7 @@ Class MainWindow
                 NoteInfo.Text = SKUList(2).ToString
                 Bag.Text = SKUList(1).ToString
                 If Bag.Text.Length < 2 Or Bag.Text = "Never Bagged" Then
-                    ChangeButton.RaiseEvent(New RoutedEventArgs(System.Windows.Controls.Button.ClickEvent, ChangeButton))
+                    ChangeButton.RaiseEvent(New RoutedEventArgs(Primitives.ButtonBase.ClickEvent, ChangeButton))
                 End If
                 If SelectedSKU.ExtendedProperties.HasScrews Then
                     Screws.Visibility = Visibility.Visible
@@ -481,11 +495,11 @@ Class MainWindow
     Private Sub UpdateScores()
 
         Try
-            workerPrepackInfo = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+            workerPrepackInfo = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
 
-            WorkerWeekTotals = WHLClasses.MySQL.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
-            WorkerWeekRecords = WHLClasses.MySQL.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
-            WorkerQuantityByUser = WHLClasses.MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
+            WorkerWeekTotals = MySQL.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
+            WorkerWeekRecords = MySQL.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
+            WorkerQuantityByUser = MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
             'WorkerQuantityByDate = SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack GROUP BY dateA ORDER BY Recs DESC;")
 
             recordString = ""
@@ -586,7 +600,7 @@ Class MainWindow
 
     Private Sub DataRefresher_Tick(ByVal sender As Object, ByVal e As EventArgs)
         Try
-            PrepackInfo = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+            PrepackInfo = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
         Catch exception1 As Exception
 
         End Try
@@ -741,7 +755,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    'ActiveItem.RemoveLocation(Location.LocationID, authd)
+                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -759,7 +773,7 @@ Class MainWindow
                         Try
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
-                                    'ActiveItem.RemoveLocation(Location.LocationID, authd)
+                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
                                 Catch ex As Exception
                                 End Try
 
@@ -780,7 +794,7 @@ Class MainWindow
                     Try
                         For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                             Try
-                                'ActiveItem.RemoveLocation(Location.LocationID, authd)
+                                ActiveItem.RemoveLocation(Location.LocationID, authd)
                             Catch ex As Exception
                             End Try
 
@@ -901,8 +915,7 @@ Class MainWindow
 
     Private Sub GetHistory()
         Historylabel.Text = ("SKU Prepack History (" & SelectedSKU.SKU & ")")
-        Dim list As New ArrayList
-        list = WHLClasses.MySQL.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
+        Dim list As ArrayList = MySQL.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
         If (list.Count = 0) Then
             HistoryBody.Text = "No history found for this SKU."
         Else
@@ -949,7 +962,7 @@ Class MainWindow
 
     Dim SkusFullLoaded As Boolean = False
     Private Sub SkuCacheInitLoader_Tick(sender As Object, e As EventArgs)
-        SkuCacheINitLoader.Stop()
+        SkuRefresherTimer.Stop()
         SkusFullLoaded = False
 
 
@@ -971,7 +984,7 @@ Class MainWindow
     Private Sub CoolButton1_Click(sender As Object, e As EventArgs) Handles AdminUpdate.Click
         ForceUpdate = True
         SkusFullLoaded = False
-        SkuCacheINitLoader.Start()
+        SkuRefresherTimer.Start()
     End Sub
 
     Private Sub AdminStatusUpdater_Tick(sender As Object, e As EventArgs)
@@ -1013,8 +1026,7 @@ Class MainWindow
                     If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then
                         If issue.DodgySku = HighlightedOrderItems.DodgySku Then
                             Try
-                                Dim ResponseInsert As Object
-                                ResponseInsert = WHLClasses.MySQL.insertUpdate("INSERT INTO whldata.prepack_test (orderid,iscomplete,pplocationname,DateCleared) VALUES ('" + order.OrderId.ToString + "', '1' , '" + System.Environment.MachineName.ToString + "','" + Now.ToShortDateString + "')")
+                                MySQL.insertUpdate("INSERT INTO whldata.prepack_test (orderid,iscomplete,pplocationname,DateCleared) VALUES ('" + order.OrderId.ToString + "', '1' , '" + Environment.MachineName.ToString + "','" + Now.ToShortDateString + "')")
 
                                 For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                     Try
@@ -1134,11 +1146,16 @@ Class MainWindow
         HighlightedOrders = Nothing
         HighlightedOrderItems = Nothing
         PrePackQueue.Clear()
-        If Not IsNothing(client) Then
-            PrepackQueueBase = client.StreamIOOrderDefinition.GetByStatus(OrderStatus._Prepack)
-        Else
+        Try
+            If Not IsNothing(client) Then
+                PrepackQueueBase = client.StreamIOOrderDefinition.GetByStatus(OrderStatus._Prepack)
+            Else
+                PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
+            End If
+        Catch ex As Exception
             PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
-        End If
+        End Try
+
         For Each order As Order In PrepackQueueBase
             For Each issue As IssueData In order.issues
                 If (Not issue.Resolved) And (Not issue.Prepack_IssuePartlyResolveFor) Then
@@ -1174,32 +1191,32 @@ Class MainWindow
 
 
     'WPF Stuff
-    Public Sub PerformClick(Button As System.Windows.Controls.Button)
-        Button.RaiseEvent(New RoutedEventArgs(System.Windows.Controls.Button.ClickEvent))
+    Public Sub PerformClick(Button As Button)
+        Button.RaiseEvent(New RoutedEventArgs(Primitives.ButtonBase.ClickEvent))
     End Sub
 
-    Friend DataRefresher As New System.Windows.Threading.DispatcherTimer
-    Friend Clock As New System.Windows.Threading.DispatcherTimer
-    Friend SkuCacheINitLoader As New System.Windows.Threading.DispatcherTimer
-    Friend AdminStatusUpdater As New System.Windows.Threading.DispatcherTimer
-    Friend UpdatePrepackOrders As New System.Windows.Threading.DispatcherTimer
+    Friend DataRefresher As New Threading.DispatcherTimer
+    Friend Clock As New Threading.DispatcherTimer
+    Friend SkuRefresherTimer As New Threading.DispatcherTimer
+    Friend AdminStatusUpdater As New Threading.DispatcherTimer
+    Friend UpdatePrepackOrders As New Threading.DispatcherTimer
     Friend Sub LoadTimers()
 
         AddHandler DataRefresher.Tick, AddressOf DataRefresher_Tick
-        AddHandler SkuCacheINitLoader.Tick, AddressOf SkuCacheInitLoader_Tick
+        AddHandler SkuRefresherTimer.Tick, AddressOf SkuCacheInitLoader_Tick
         AddHandler Clock.Tick, AddressOf Clock_Tick
         AddHandler AdminStatusUpdater.Tick, AddressOf AdminStatusUpdater_Tick
         AddHandler UpdatePrepackOrders.Tick, AddressOf UpdatePrepackOrders_Tick
 
         DataRefresher.Interval = New TimeSpan(0, 0, 0, 0, 5000)
         Clock.Interval = New TimeSpan(0, 0, 0, 0, 100)
-        SkuCacheINitLoader.Interval = New TimeSpan(0, 0, 0, 0, 100)
+        SkuRefresherTimer.Interval = New TimeSpan(0, 0, 10)
         AdminStatusUpdater.Interval = New TimeSpan(0, 0, 0, 0, 50)
         UpdatePrepackOrders.Interval = New TimeSpan(0, 0, 0, 0, 15000)
         DataRefresher.Start()
         Clock.Start()
-        SkuCacheINitLoader.Start()
         AdminStatusUpdater.Start()
+        SkuRefresherTimer.Start()
         UpdatePrepackOrders.Start()
     End Sub
 

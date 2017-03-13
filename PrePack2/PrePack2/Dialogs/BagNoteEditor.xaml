@@ -3,13 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PrePack2"
              mc:Ignorable="d" 
              d:DesignHeight="720" d:DesignWidth="1280">
     <Grid Background="White">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
         <Grid HorizontalAlignment="Left" Height="627" VerticalAlignment="Top" Width="180" Margin="10,0,0,0">
             <GroupBox Header="Misc" HorizontalAlignment="Left" Height="607" Margin="10,10,0,0" VerticalAlignment="Top" Width="160" FontSize="15">
                 <UniformGrid HorizontalAlignment="Left" Height="566.5" Margin="10,10,-2,0" VerticalAlignment="Top" Width="140" Rows="8">
@@ -28,9 +24,6 @@
             <TextBlock x:Name="Packsize" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Current Pack Size:" VerticalAlignment="Top" Height="68" Width="680.29" FontSize="26"/>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="632" Margin="195,0,0,0" VerticalAlignment="Top" Width="351">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
             <GroupBox Header="Bags" HorizontalAlignment="Left" Height="612" Margin="10,10,0,0" VerticalAlignment="Top" Width="331" FontSize="15">
                 <UniformGrid HorizontalAlignment="Left" Height="572" Margin="10,10,0,0" VerticalAlignment="Top" Width="302" Rows="8" Columns="2">
                     <Button x:Name="BAGA" Content="BAG A" FontSize="20" Margin="10,10,5,5"/>
