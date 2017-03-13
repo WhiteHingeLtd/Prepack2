@@ -75,8 +75,8 @@ Class MainWindow
                 End If
                 Try
                         '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                        If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                            Dim batch As String = MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
+                        If IsNumeric(MSSQLPublic.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                            Dim batch As String = MSSQLPublic.SelectData("SELECT TOP 1 logid from whldata.log_prepack order by logid desc")(0)(0).ToString
                             labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
 
                             '27/08/16
@@ -108,7 +108,7 @@ Class MainWindow
                 End If
                 If Not IsNothing(ActiveItem) Then
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                    If IsNumeric(MSSQLPublic.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                         labels.ShelfLabel(ActiveItem, ActiveChildren, PrinterName, printquantity)
 
                         '27/08/16
@@ -132,7 +132,7 @@ Class MainWindow
                 End If
                 If Not IsNothing(ActiveItem) Then
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                    If IsNumeric(MSSQLPublic.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                         labels.MagnetLabel(ActiveItem, PrinterName, printquantity)
 
                         '27/08/16
@@ -155,7 +155,7 @@ Class MainWindow
                 End If
                 If Not IsNothing(ActiveItem) Then
                     '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                    If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                    If IsNumeric(MSSQLPublic.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + ActiveItem.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + ActiveItem.Title.Label + "','" + ActiveItem.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
                         labels.PPReadyLabel(ActiveItem, PrinterName, printquantity)
 
                         '27/08/16
@@ -189,8 +189,8 @@ Class MainWindow
                     End If
                     Try
                         '29/02/2016     Moved the logging code to before label generation so the batch code can be added. 
-                        If IsNumeric(MySQL.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
-                            Dim batch As String = MySQL.SelectData("SELECT LAST_INSERT_ID();")(0)(0).ToString
+                        If IsNumeric(MSSQLPublic.insertUpdate("INSERT INTO whldata.log_prepack (UserId, UserFullName, WorkStationName, Time, PP_Sku, PP_Label, PP_Quantity, PP_ShortTitle, PP_Binrack, DateA) VALUES (" + authd.PayrollId.ToString + ",'" + authd.FullName + "','" + My.Computer.Name + "','" + Now.ToString("dd/MM/yyyy HH:mm") + "','" + SelectedSKU.SKU + "','" + PritingLabelID.ToString + "','" + printquantity.ToString + "','" + SelectedSKU.Title.Label + "','" + SelectedSKU.GetLocation(SKULocation.SKULocationType.Pickable).LocalLocationName + "','" + Now.ToString("yyyy-MM-dd") + "');")) Then
+                            Dim batch As String = MSSQLPublic.SelectData("SELECT TOP 1 logid from whldata.log_prepack order by logid desc;")(0)(0).ToString
                             labels.PrepackLabel(SelectedSKU, PrinterName, printquantity, batch)
 
                             '27/08/16
@@ -257,7 +257,7 @@ Class MainWindow
     Private Sub Main_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Loaded
         Process.Start("taskkill.exe", "/f /im explorer.exe")
         BarcodeSettings.ApplyKey("LJG05B1M4RS-FOTV9-JSHEF-CQOHO")
-        Dim response As Object = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+        Dim response As Object = MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
         If response.GetType Is "".GetType Then
             Dim EMsgBox As New WPFMsgBoxDialog
             EMsgBox.Body.Text = "Couldn't load Prepack Info"
@@ -306,7 +306,7 @@ Class MainWindow
         ChooseLabel(1)
     End Sub
     Private Function LoadLocationReference()
-        Dim Locations As ArrayList = MySQL.SelectData("SELECT * FROM whldata.locationreference;")
+        Dim Locations As ArrayList = MSSQLPublic.SelectData("SELECT * FROM whldata.locationreference;")
         For Each Location As ArrayList In Locations
             LocationReferenceDict.Add(Location(0), Location(1))
 
@@ -495,8 +495,9 @@ Class MainWindow
     Private Sub UpdateScores()
 
         Try
-            workerPrepackInfo = MySQL.SelectData("SELECT * FROM whldata.prepacklist")
-
+            workerPrepackInfo = MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
+            Throw New NotImplementedException
+            'ToDo
             WorkerWeekTotals = MySQL.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
             WorkerWeekRecords = MySQL.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
             WorkerQuantityByUser = MySQL.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")

@@ -18,14 +18,15 @@
             EMsgBox2.ShowDialog()
 
         Else
+            Throw New NotImplementedException
             Dim query As String = "REPLACE INTO whldata.prepacklist (Sku,Bag,Notes) VALUES ('" + ActiveSku.SKU + "','" + boxtext + "','" + NotesBox.Text + "');"
-            WHLClasses.MySQL.insertUpdate(query)
+            WHLClasses.MSSQLPublic.insertUpdate(query)
             ActiveSku.PrepackInfo.Bag = boxtext
             ActiveSku.PrepackInfo.Notes = NotesBox.Text
 
             MainWindow.BagShared = boxtext
             MainWindow.NoteInfoShared = NotesBox.Text
-            MainWindow.PrepackInfo = WHLClasses.MySQL.SelectData("SELECT * FROM whldata.prepacklist")
+            MainWindow.PrepackInfo = WHLClasses.MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
             Me.Close()
             Activate()
 
