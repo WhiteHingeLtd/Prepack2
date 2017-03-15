@@ -496,11 +496,9 @@ Class MainWindow
 
         Try
             workerPrepackInfo = MSSQLPublic.SelectData("SELECT * FROM whldata.prepacklist")
-            Throw New NotImplementedException
-            'ToDo
-            WorkerWeekTotals = MSSQLPublic.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY Amount DESC LIMIT 10")
-            WorkerWeekRecords = MSSQLPublic.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId ORDER BY count DESC LIMIT 10")
-            WorkerQuantityByUser = MSSQLPublic.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserId, dateA ORDER BY Recs DESC;")
+            WorkerWeekTotals = MSSQLPublic.SelectData("SELECT UserFullName, Sum(PP_Quantity) AS Amount FROM whldata.log_prepack WHERE DateA > '" + Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserFullName ORDER BY Amount DESC")
+            WorkerWeekRecords = MSSQLPublic.SelectData("SELECT UserFullName, COUNT(PP_Sku) AS count FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserFullName ORDER BY count DESC")
+            WorkerQuantityByUser = MSSQLPublic.SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack WHERE DateA > '" + DateAndTime.Now.AddDays(-7).ToString("yyyy-MM-dd") + "' AND DateA < '" + DateAndTime.Now.AddDays(1).ToString("yyyy-MM-dd") + "' GROUP BY UserFullName, dateA ORDER BY Recs DESC;")
             'WorkerQuantityByDate = SelectData("SELECT SUM(PP_Quantity) as Recs, userFUllName, dateA FROM whldata.log_prepack GROUP BY dateA ORDER BY Recs DESC;")
 
             recordString = ""
@@ -916,8 +914,7 @@ Class MainWindow
 
     Private Sub GetHistory()
         Historylabel.Text = ("SKU Prepack History (" & SelectedSKU.SKU & ")")
-        Throw New NotImplementedException 
-        Dim list As ArrayList = MSSQLPublic.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserId, DateA ORDER BY DateA DESC LIMIT 10;")
+        Dim list As ArrayList = MSSQLPublic.SelectData("Select UserFullName, Sum(PP_Quantity) As Amount, DateA FROM whldata.log_prepack WHERE PP_Sku='" & SelectedSKU.SKU.ToString & "' GROUP BY UserFullName, DateA ORDER BY DateA DESC;")
         If (list.Count = 0) Then
             HistoryBody.Text = "No history found for this SKU."
         Else
