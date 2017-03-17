@@ -2,6 +2,7 @@
 Imports System.ComponentModel
 Imports System.Drawing.Printing
 Imports System.Speech.Synthesis
+Imports System.Windows.Threading
 Imports WHLClasses
 Imports WHLClasses.Orders
 
@@ -24,8 +25,10 @@ Class MainWindow
     Private LocationReferenceLoader As New BackgroundWorker
     Private PrepackStatsWorker As New BackgroundWorker
 
+    Private PrepackStatsTimer As New DispatcherTimer
+
+
     Friend Skusfull As New SkuCollection(True)
-    Private Skus As New SkuCollection(True)
     Private labels As New LabelMaker
     Public PrepackInfoDict As New Dictionary(Of String, String)
     Public LocationReferenceDict As New Dictionary(Of String, String)
@@ -48,7 +51,7 @@ Class MainWindow
 
         Try
         If ScanBox.Text.Length > 6 Then
-            ExecuteSearch()
+            ProcessSearch(ScanBox.Text)
         Else
             Dim PrinterSettings As New PrinterSettings
         PrinterName = PrinterSettings.PrinterName
@@ -272,6 +275,10 @@ Class MainWindow
         AddHandler PrepackStatsWorker.DoWork, AddressOf UpdateScores
         AddHandler PrepackStatsWorker.RunWorkerCompleted, AddressOf UpdateScoresOnScreen
         AddHandler LocationReferenceLoader.DoWork, AddressOf LoadLocationReference
+        AddHandler PrepackStatsTimer.Tick, AddressOf PrepackStatsTimer_Tick
+        PrepackStatsTimer.Interval = New TimeSpan(0,5,0)
+        PrepackStatsTimer.Start()
+        PrepackStatsTimer_Tick(Nothing,Nothing)
         If Not LocationReferenceLoader.IsBusy Then
             LocationReferenceLoader.RunWorkerAsync()
         End If
@@ -292,7 +299,6 @@ Class MainWindow
         Dim Loader2 As New GenericDataController
         Try
             Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
-            Skus = Skusfull.MakeMixdown
         Catch ex As Exception
             MsgBox(ex.Message.ToString)
         End Try
@@ -305,6 +311,13 @@ Class MainWindow
         UpdateLoginInfo()
         ChooseLabel(1)
     End Sub
+
+    Private Sub PrepackStatsTimer_Tick(sender As Object, e As EventArgs)
+       If Not (PrepackStatsWorker.IsBusy)
+            PrepackStatsWorker.RunWorkerAsync
+       End If
+    End Sub
+
     Private Function LoadLocationReference()
         Dim Locations As ArrayList = MSSQLPublic.SelectData("SELECT * FROM whldata.locationreference;")
         For Each Location As ArrayList In Locations
@@ -393,7 +406,7 @@ Class MainWindow
         If (e.Key = Key.Return) Then
             e.Handled = True
             My.Computer.Audio.Stop()
-            ExecuteSearch()
+            ProcessSearch(ScanBox.Text)
         End If
     End Sub
 
@@ -624,6 +637,9 @@ Class MainWindow
             If Data.StartsWith("10") And Data.Length = 11 Then
                 Data = Data.Remove(7)
             End If
+            If (Data.Length = 5) Then
+                Data = "10" + Data
+            End If
             NewScan = True
             '28/01/2016     Swapped out the old raw code for the class host searching methods. 
 
@@ -661,11 +677,16 @@ Class MainWindow
                     Else
                         'Got a choice here kid. 
                         Synthesizer.SpeakAsync("Choose the correct item from the list.")
-                        'BundleDialog.bundleoptionsal = SearchResults
-                        'BundleDialog.ShowDialog()
-                        'ActiveItem = BundleDialog.chosenshsku
+                        Dim BundleChooser as New BundleDialog
+                        BundleChooser.BundleOptions = SearchResults
+
+                        HideMe.Visibility = Visibility.Visible
+                        BundleChooser.ShowDialog()
+                        ActiveItem = BundleChooser.ChosenSku
+                        HideMe.Visibility = Visibility.Collapsed
                         PopulateData()
                         Try
+
                             For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
                                 Try
                                     ActiveItem.RemoveLocation(Location.LocationID, authd)
@@ -723,105 +744,7 @@ Class MainWindow
         ScanBox.Text = ""
         ScanBox.Focus()
     End Sub
-    Private Sub ExecuteSearch()
-        Dim text As String = ScanBox.Text
-        If text.StartsWith("qzu") Then
-            authd = Emps.FindEmployeeByID(Convert.ToInt32(text.Replace("qzu", "")))
-        ElseIf (text.Length > 0) Then
-            If text.StartsWith("10") And text.Length = 11 Then
-                text = text.Remove(7)
-            End If
-            NewScan = True
-            '28/01/2016     Swapped out the old raw code for the class host searching methods. 
-
-            Try
-                Dim SearchResults As SkuCollection = Skusfull.ExcludeStatus("Dead").SearchSKUS(text)
-                If SearchResults.Count > 1 Then
-
-                    Dim AllSame As Boolean = True
-                    Dim SameVal As String = SearchResults(0).ShortSku
-                    For Each SearchRes As WhlSKU In SearchResults
-                        If SearchRes.ShortSku = SameVal Then
-                        Else
-                            AllSame = False
-                        End If
-
-                    Next
-                    If AllSame = True Then
-                        'Continue!
-                        ActiveItem = SearchResults(0)
-                        PopulateData()
-                        Try
-                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
-                                Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
-                                Catch ex As Exception
-                                End Try
-
-                            Next
-                        Catch ex As Exception
-                            MsgBox(ex.Message.ToString)
-                        End Try
-                    Else
-                        'Got a choice here kid. 
-                        Synthesizer.SpeakAsync("Choose the correct item from the list.")
-                        'BundleDialog.bundleoptionsal = SearchResults
-                        'BundleDialog.ShowDialog()
-                        'ActiveItem = BundleDialog.chosenshsku
-                        PopulateData()
-                        Try
-                            For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
-                                Try
-                                    ActiveItem.RemoveLocation(Location.LocationID, authd)
-                                Catch ex As Exception
-                                End Try
-
-                            Next
-                        Catch ex As Exception
-                            MsgBox(ex.Message.ToString)
-                        End Try
-                    End If
-
-                ElseIf SearchResults.Count = 0 Then
-                    'No results. RIP. 
-                    Synthesizer.SpeakAsync("Nothing found.")
-                    ResetDisp()
-                Else
-                    'Continue!
-                    ActiveItem = SearchResults(0)
-                    PopulateData()
-                    Try
-                        For Each Location As SKULocation In ActiveItem.GetLocationsByType(SKULocation.SKULocationType.PrepackInstant)
-                            Try
-                                ActiveItem.RemoveLocation(Location.LocationID, authd)
-                            Catch ex As Exception
-                            End Try
-
-                        Next
-                    Catch ex As Exception
-                        MsgBox(ex.Message.ToString)
-                    End Try
-
-                End If
-            Catch ex As Exception
-                Dim EMsgBox As New WPFMsgBoxDialog
-
-                EMsgBox.Body.Text = "Couldn't search because the system is too busy, please try again in a few minutes."
-                EMsgBox.ShowDialog()
-
-            End Try
-
-
-        Else
-            Dim EMsgBox As New WPFMsgBoxDialog
-
-            EMsgBox.Body.Text = "We couldn't recognise that barcode, Please try again."
-            EMsgBox.ShowDialog()
-        End If
-        ScanBox.Text = ""
-        ScanBox.Focus()
-
-    End Sub
+ 
     Public Shared BagShared As String = ""
     Private Sub PopulateData()
         Try
@@ -967,10 +890,7 @@ Class MainWindow
 
         Dim Loader2 As New GenericDataController
         Try
-
             Skusfull = Loader2.SmartSkuCollLoad(True, "", False)
-            Skus = Skusfull.MakeMixdown
-
         Catch ex As Exception
             MsgBox(ex.Message.ToString)
         End Try
@@ -1012,12 +932,15 @@ Class MainWindow
     Private Sub CoolButton1_Click_1(sender As Object, e As EventArgs) Handles ActivePPQCompleteButton.Click
         '03/06/2016     Modified to implement the listyness of the highlightedorder. Basically just wrapped in a for loop ayylamow
 
-
+        Try
         If Not IsNothing(client) Then
             PrepackQueueBase = client.StreamIOOrderDefinition.GetByStatus(OrderStatus._Prepack)
         Else
             PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
         End If
+        Catch ex As Exception
+            PrepackQueueBase = loader.LoadOrddef("T:\AppData\Orders\io.orddef", False, True).GetByStatus(OrderStatus._Prepack)
+        End Try
         Try
             For Each order As Order In PrepackQueueBase
 

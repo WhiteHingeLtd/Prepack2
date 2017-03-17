@@ -51,3 +51,4 @@ PrePack2/PrePack2/obj/*
 PrePack2/Packages/*
 *.suo
 *.pfx
+*.user
