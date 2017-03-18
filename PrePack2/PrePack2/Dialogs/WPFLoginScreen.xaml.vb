@@ -1,7 +1,7 @@
 ﻿Imports WHLClasses
 Public Class WPFLoginScreen
     Private RequiresPin As Boolean = False
-    Public empcol As New EmployeeCollection
+    ReadOnly empcol As New EmployeeCollection
     Private CurrentEmployee As New Employee
     Private Sub WPFLoginScreenLoad() Handles Me.Loaded
         Focus()

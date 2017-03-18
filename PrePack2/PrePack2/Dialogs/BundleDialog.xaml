@@ -6,13 +6,13 @@
       xmlns:local="clr-namespace:PrePack2"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
-      Title="BundleDialog" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Background="{x:Null}">
+      Title="BundleDialog" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Background="{x:Null}" Height="479.2" Width="854">
     <Grid Background="#FF0046FF">
         <Grid.RowDefinitions>
             <RowDefinition Height="13*"/>
             <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
-        <Button x:Name="SubmitButton" Content="Button" Margin="112.5,10" Grid.Row="1" RenderTransformOrigin="0.386,0.597"/>
-        <ListBox x:Name="SkuBox" HorizontalAlignment="Left" Height="260" VerticalAlignment="Top" Width="300" Background="{x:Null}" Foreground="White"/>
+        <Button x:Name="SubmitButton" Content="Choose" Margin="118,6,119,6" Grid.Row="1" RenderTransformOrigin="0.386,0.597" FontSize="18" VerticalAlignment="Center"/>
+        <ListBox x:Name="SkuBox" Background="{x:Null}" Foreground="White" FontSize="36" HorizontalContentAlignment="Center" FontWeight="Bold"/>
     </Grid>
 </Window>

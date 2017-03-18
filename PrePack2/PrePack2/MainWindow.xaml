@@ -6,16 +6,6 @@
         mc:Ignorable="d"
         Closing="Main_FormClosing"
         Title="MainWindow" Height="1080" Width="1920" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="{x:Null}">
-    <Window.Resources>
-        <Storyboard x:Key="MagicBackground" RepeatBehavior="Forever">
-
-        </Storyboard>
-    </Window.Resources>
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard x:Name="MagicBackground_BeginStoryboard" Storyboard="{StaticResource MagicBackground}"/>
-        </EventTrigger>
-    </Window.Triggers>
     <Grid x:Name="BackgroundGrid" Height="1080" VerticalAlignment="Top">
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
