@@ -68,7 +68,7 @@
         </Grid>
         <Grid HorizontalAlignment="Left" Height="627" Margin="925,0,0,0" VerticalAlignment="Top" Width="354">
             <GroupBox Header="GroupBox" HorizontalAlignment="Left" Height="492" Margin="10,10,0,0" VerticalAlignment="Top" Width="334" FontSize="15">
-                <TextBox x:Name="NotesBox" HorizontalAlignment="Left" Height="452" Margin="10,10,-2,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="314"/>
+                <TextBox x:Name="NotesBox" HorizontalAlignment="Left" Height="452" Margin="10,10,-2,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="314"/>
             </GroupBox>
             <Grid HorizontalAlignment="Left" Height="120" Margin="0,507,0,0" VerticalAlignment="Top" Width="354">
                 <TextBlock HorizontalAlignment="Left" Margin="23,24.612,0,0" TextWrapping="Wrap" Text="New Bag:" VerticalAlignment="Top" Height="22.46" Width="81.79" FontSize="16"/>
